@@ -5,7 +5,7 @@ import Home from "./Pages/Home";
 import Tentang from "./Pages/Tentang";
 import AnimatedBackground from "./components/Background";
 import Navbar from "./components/Navbar";
-import Litbang Web from "./Pages/Litbang Web";
+import LitbangWeb from "./Pages/LitbangWeb";
 import ContactPage from "./Pages/Kontak";
 import ProjectDetails from "./components/ProjectDetail";
 import WelcomeScreen from "./Pages/WelcomeScreen";
