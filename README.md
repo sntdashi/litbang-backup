@@ -1,8 +1,8 @@
-# Portfolio
+# Litbang Web
 
 Hello everyoneee\! 👋
 
-Let me introduce myself, I'm **Rauzzzzzzzzzzzan Muhamad Fikri**. On this occasion, I'd like to share the portfolio website project that I've developed.
+Let me introduce myself, I'm **Rauzzzzzzzzzzzan Muhamad Fikri**. On this occasion, I'd like to share the Litbang Web website project that I've developed.
 
 ## 🚀 Live Demo
 
@@ -14,7 +14,7 @@ This project is built using modern web technologies:
 
   - **ReactJS** - Frontend framework
   - **Tailwind CSS** - Utility-first CSS framework
-  - **Supabase** - Backend for portfolio data, certificates, and comment system
+  - **Supabase** - Backend for Litbang Web data, certificates, and comment system
   - **AOS** - Animate On Scroll library
   - **Framer Motion** - Animation library
   - **Lucide** - Icon library
