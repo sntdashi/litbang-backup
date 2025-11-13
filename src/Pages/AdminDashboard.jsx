@@ -1,3 +1,5 @@
+import ReactDOM from 'react-dom'; // <-- TAMBAHIN INI DI PALING ATAS
+// ... (sisa import lu)
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../supabaseClient'; // Pastiin path ini bener
 import { useNavigate } from 'react-router-dom';
@@ -17,14 +19,16 @@ const BackgroundEffect = () => (
   </div>
 );
 
-// --- (2) MODAL COMPONENT (Versi Final Fix Pake 'grid') ---
+// --- (2) MODAL COMPONENT (Versi Final Fix Pake PORTAL) ---
 const Modal = ({ isOpen, onClose, title, children }) => {
   if (!isOpen) return null;
 
-  return (
-    // 1. GANTI 'flex items-center justify-center' -> 'grid place-items-center'
-    // 'place-items-center' itu shortcut sakti buat nengahin horizontal + vertikal.
-    // 2. Tambah 'backdrop-blur-lg' (biar ngeblur!)
+  // Ini dia magic-nya: "Teleport" modal ini ke document.body
+  // Biar dia ga nempel di dalem <section> yang nge-blur
+  return ReactDOM.createPortal( 
+    
+    // 1. 'grid place-items-center' (biar nengah)
+    // 2. 'backdrop-blur-lg' (biar ngeblur!)
     <div 
       className="fixed inset-0 bg-black/80 backdrop-blur-lg z-50 grid place-items-center p-4"
       onClick={onClose}
@@ -50,7 +54,8 @@ const Modal = ({ isOpen, onClose, title, children }) => {
         </h2>
         {children}
       </div>
-    </div>
+    </div>,
+    document.body // <-- INI LOKASI TELEPORT-NYA
   );
 };
 // --- AKHIR FIX MODAL ---

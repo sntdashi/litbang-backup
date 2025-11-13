@@ -27,7 +27,7 @@ const StatusBadge = memo(() => (
 // MainTitle Component (Sudah diubah)
 const MainTitle = memo(() => (
   <div className="space-y-2" data-aos="fade-up" data-aos-delay="600">
-    <h1 className="text-5xl sm:text-3xl md:text-3xl lg:text-4xl xl:text-5xl font-bold tracking-tight">
+    <h1 className="text-4xl sm:text-5xl xl:text-6xl font-bold tracking-tight">
       <span className="relative inline-block">
         {/* Style: TIDAK DIUBAH (AMAN) */}
         <span className="absolute -inset-2 bg-gradient-to-r from-[#8B0000] to-[#FF4444] blur-2xl opacity-20"></span>
@@ -40,7 +40,7 @@ const MainTitle = memo(() => (
           Riset
         </span>
       </span>
-      <br />
+      <br className="hidden sm:block" />
       <span className="relative inline-block mt-2">
         {/* Style: TIDAK DIUBAH (AMAN) */}
         <span className="absolute -inset-2 bg-gradient-to-r from-[#8B0000] to-[#FF4444] blur-2xl opacity-20"></span>
