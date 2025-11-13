@@ -229,7 +229,7 @@ export default function FullWidthTabs() {
       {/* --- Akhir Perubahan Header --- */}
 
       <Box sx={{ width: "100%" }}>
-        {/* AppBar/Tabs: Style TIDAK DIUBAH (AMAN) */}
+        {/* --- PERUBAHAN BESAR DI 'sx' BAWAH INI --- */}
         <AppBar
           position="static"
           elevation={0}
@@ -246,14 +246,14 @@ export default function FullWidthTabs() {
               left: 0,
               right: 0,
               bottom: 0,
-              background: "linear-gradient(180deg, rgba(139, 92, 246, 0.03) 0%, rgba(59, 130, 246, 0.03) 100%)",
+              // Diubah: Gradien ungu/biru -> gradien maroon
+              background: "linear-gradient(180deg, rgba(139, 0, 0, 0.03) 0%, rgba(255, 68, 68, 0.03) 100%)",
               backdropFilter: "blur(10px)",
               zIndex: 0,
             },
           }}
           className="md:px-4"
         >
-          {/* --- Perubahan Label & Ikon Tabs --- */}
           <Tabs
             value={value}
             onChange={handleChange}
@@ -265,7 +265,7 @@ export default function FullWidthTabs() {
               "& .MuiTab-root": {
                 fontSize: { xs: "0.9rem", md: "1rem" },
                 fontWeight: "600",
-                color: "#94a3b8",
+                color: "#94a3b8", // Warna teks non-aktif (abu-abu)
                 textTransform: "none",
                 transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
                 padding: "20px 0",
@@ -274,7 +274,8 @@ export default function FullWidthTabs() {
                 borderRadius: "12px",
                 "&:hover": {
                   color: "#ffffff",
-                  backgroundColor: "rgba(139, 92, 246, 0.1)",
+                  // Diubah: Warna hover ungu -> maroon
+                  backgroundColor: "rgba(139, 0, 0, 0.1)",
                   transform: "translateY(-2px)",
                   "& .lucide": {
                     transform: "scale(1.1) rotate(5deg)",
@@ -282,15 +283,18 @@ export default function FullWidthTabs() {
                 },
                 "&.Mui-selected": {
                   color: "#fff",
-                  background: "linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(59, 130, 246, 0.2))",
-                  boxShadow: "0 4px 15px -3px rgba(139, 92, 246, 0.2)",
+                  // Diubah: Gradien ungu/biru -> gradien maroon
+                  background: "linear-gradient(135deg, rgba(139, 0, 0, 0.2), rgba(255, 68, 68, 0.2))",
+                  // Diubah: Shadow ungu -> maroon
+                  boxShadow: "0 4px 15px -3px rgba(139, 0, 0, 0.2)",
                   "& .lucide": {
-                    color: "#a78bfa",
+                    // Diubah: Warna ikon ungu -> merah muda/terang
+                    color: "#FF8888", // (Ini dari palet maroon-red-300 kita)
                   },
                 },
               },
               "& .MuiTabs-indicator": {
-                height: 0,
+                height: 0, // Indikatornya pake background tab, jadi 0
               },
               "& .MuiTabs-flexContainer": {
                 gap: "8px",
@@ -299,22 +303,22 @@ export default function FullWidthTabs() {
           >
             <Tab
               icon={<Code className="mb-2 w-5 h-5 transition-all duration-300" />}
-              label="Program Kerja" // Diubah: Label
+              label="Program Kerja"
               {...a11yProps(0)}
             />
             <Tab
-              icon={<FlaskConical className="mb-2 w-5 h-5 transition-all duration-300" />} // Diubah: Ikon
-              label="Workshop & Riset" // Diubah: Label
+              icon={<FlaskConical className="mb-2 w-5 h-5 transition-all duration-300" />}
+              label="Workshop & Riset"
               {...a11yProps(1)}
             />
             <Tab
               icon={<Boxes className="mb-2 w-5 h-5 transition-all duration-300" />}
-              label="Fokus Teknologi" // Diubah: Label
+              label="Fokus Teknologi"
               {...a11yProps(2)}
             />
           </Tabs>
-          {/* --- Akhir Perubahan Tabs --- */}
         </AppBar>
+        {/* --- AKHIR PERUBAHAN 'sx' --- */}
 
         <SwipeableViews
           axis={theme.direction === "rtl" ? "x-reverse" : "x"}
