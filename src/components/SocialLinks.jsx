@@ -52,8 +52,8 @@ const socialLinks = [
     subText: "Kunjungi web utama HIMATIF",
     icon: Globe,
     url: "https://himatif.id", // Ganti ke link yg bener
-    color: "#6366f1",
-    gradient: "from-[#6366f1] to-[#a855f7]",
+    color: "#8B0000",
+    gradient: "from-[#8B0000] to-[#FF4444]",
     isPrimary: true,
   },
   {

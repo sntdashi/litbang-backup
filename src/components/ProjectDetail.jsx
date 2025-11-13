@@ -142,7 +142,7 @@ const ProjectDetails = () => {
   // --- Tampilan Loading Baru ---
   if (isLoading || !project) {
     return (
-      <div className="min-h-screen bg-[#030014] flex items-center justify-center">
+      <div className="min-h-screen bg-[#1A0000] flex items-center justify-center">
         <div className="text-center space-y-6 animate-fadeIn">
           {/* Ganti pake icon Loader2 biar konsisten */}
           <Loader2 className="w-16 h-16 md:w-24 md:h-24 mx-auto text-indigo-500 animate-spin" />
@@ -154,7 +154,7 @@ const ProjectDetails = () => {
 
   // --- RENDER HALAMAN (Teks Diubah) ---
   return (
-    <div className="min-h-screen bg-[#030014] px-[2%] sm:px-0 relative overflow-hidden">
+    <div className="min-h-screen bg-[#1A0000] px-[2%] sm:px-0 relative overflow-hidden">
       {/* Background animations: TIDAK DIUBAH (AMAN) */}
       <div className="fixed inset-0">
         <div className="absolute -inset-[10px] opacity-20">

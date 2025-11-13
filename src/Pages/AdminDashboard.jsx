@@ -513,7 +513,7 @@ const AdminDashboard = () => {
   // Loading state (Aman)
   if (!user) {
     return (
-      <div className="min-h-screen w-full flex items-center justify-center bg-[#030014]">
+      <div className="min-h-screen w-full flex items-center justify-center bg-[#1A0000]">
         <Loader2 className="w-10 h-10 text-indigo-500 animate-spin" />
       </div>
     );
@@ -521,7 +521,7 @@ const AdminDashboard = () => {
 
   // Render Halaman Admin (Aman)
   return (
-    <div className="relative min-h-screen w-full bg-[#030014] text-white p-4 md:p-8">
+    <div className="relative min-h-screen w-full bg-[#1A0000] text-white p-4 md:p-8">
       <BackgroundEffect />
 
       {/* Header Admin */}

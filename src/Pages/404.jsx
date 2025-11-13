@@ -22,7 +22,7 @@ export default function NotFoundPage() {
 
   return (
     // 1. Perubahan di sini: HAPUS '-z-20'
-    <div className="relative min-h-screen bg-[#030014] flex items-center justify-center px-4">
+    <div className="relative min-h-screen bg-[#1A0000] flex items-center justify-center px-4">
       <BackgroundEffect />
       
       {/* 2. Perubahan di sini: TAMBAH 'relative z-10' biar nongol di DEPAN */}
