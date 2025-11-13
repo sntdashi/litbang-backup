@@ -102,7 +102,7 @@ const ProjectDetails = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    const storedProjects = JSON.parse(localStorage.getItem("Proyek")) || [];
+    const storedProjects = JSON.parse(localStorage.getItem("projects")) || [];
     const selectedProject = storedProjects.find((p) => String(p.id) === id);
     
     if (selectedProject) {
@@ -150,7 +150,7 @@ const ProjectDetails = () => {
               <span>Back</span>
             </button>
             <div className="flex items-center space-x-1 md:space-x-2 text-sm md:text-base text-white/50">
-              <span>Proyek</span>
+              <span>Projects</span>
               <ChevronRight className="w-3 h-3 md:w-4 md:h-4" />
               <span className="text-white/90 truncate">{project.Title}</span>
             </div>

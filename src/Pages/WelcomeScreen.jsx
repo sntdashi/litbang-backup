@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Code2, Github, Globe, User } from 'lucide-react';
+// Perubahan di sini: Mengganti User & Github dengan Brain & Users
+import { Code2, Globe, Brain, Users } from 'lucide-react';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 
@@ -29,6 +30,7 @@ const TypewriterEffect = ({ text }) => {
   );
 };
 
+// Style, Animasi, Background = TIDAK DIUBAH (AMAN)
 const BackgroundEffect = () => (
   <div className="absolute inset-0 overflow-hidden">
     <div className="absolute inset-0 bg-gradient-to-r from-indigo-600/20 to-purple-600/20 blur-3xl animate-pulse" />
@@ -36,6 +38,7 @@ const BackgroundEffect = () => (
   </div>
 );
 
+// Style, Animasi, Background = TIDAK DIUBAH (AMAN)
 const IconButton = ({ Icon }) => (
   <div className="relative group hover:scale-110 transition-transform duration-300">
     <div className="absolute -inset-2 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full blur opacity-30 group-hover:opacity-75 transition duration-300" />
@@ -55,16 +58,18 @@ const WelcomeScreen = ({ onLoadingComplete }) => {
       mirror: false,
     });
 
+    // Timer loading tetap sama (4 detik) biar animasinya gak kepotong
     const timer = setTimeout(() => {
       setIsLoading(false);
       setTimeout(() => {
         onLoadingComplete?.();
       }, 1000);
-    }, 4000);
+    }, 4000); 
     
     return () => clearTimeout(timer);
   }, [onLoadingComplete]);
 
+  // Varian animasi = TIDAK DIUBAH (AMAN)
   const containerVariants = {
     exit: {
       opacity: 0,
@@ -104,19 +109,20 @@ const WelcomeScreen = ({ onLoadingComplete }) => {
           
           <div className="relative min-h-screen flex items-center justify-center px-4">
             <div className="w-full max-w-4xl mx-auto">
-              {/* Icons */}
+              {/* Icons (Perubahan di sini) */}
               <motion.div 
                 className="flex justify-center gap-3 sm:gap-4 md:gap-8 mb-6 sm:mb-8 md:mb-12"
                 variants={childVariants}
               >
-                {[Code2, User, Github].map((Icon, index) => (
+                {/* Mengganti ikon [Code2, User, Github] jadi [Code2, Brain, Users] */}
+                {[Code2, Brain, Users].map((Icon, index) => (
                   <div key={index} data-aos="fade-down" data-aos-delay={index * 200}>
                     <IconButton Icon={Icon} />
                   </div>
                 ))}
               </motion.div>
 
-              {/* Welcome Text */}
+              {/* Welcome Text (Perubahan di sini) */}
               <motion.div 
                 className="text-center mb-6 sm:mb-8 md:mb-12"
                 variants={childVariants}
@@ -129,22 +135,20 @@ const WelcomeScreen = ({ onLoadingComplete }) => {
                     <span data-aos="fade-right" data-aos-delay="400" className="inline-block px-2 bg-gradient-to-r from-white via-blue-100 to-purple-200 bg-clip-text text-transparent">
                       To
                     </span>{' '}
-                    <span data-aos="fade-right" data-aos-delay="600" className="inline-block px-2 bg-gradient-to-r from-white via-blue-100 to-purple-200 bg-clip-text text-transparent">
-                      My
-                    </span>
+                    {/* Span "My" dihapus */}
                   </div>
                   <div>
-                    <span data-aos="fade-up" data-aos-delay="800" className="inline-block px-2 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                      Litbang Web
+                    <span data-aos="fade-up" data-aos-delay="600" className="inline-block px-2 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                      Litbang
                     </span>{' '}
-                    <span data-aos="fade-up" data-aos-delay="1000" className="inline-block px-2 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                      Website
+                    <span data-aos="fade-up" data-aos-delay="800" className="inline-block px-2 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                      HIMATIF
                     </span>
                   </div>
                 </h1>
               </motion.div>
 
-              {/* Website Link */}
+              {/* Website Link (Perubahan di sini) */}
               <motion.div 
                 className="text-center"
                 variants={childVariants}
@@ -152,7 +156,8 @@ const WelcomeScreen = ({ onLoadingComplete }) => {
                 data-aos-delay="1200"
               >
                 <a
-                  href="https://www.rawrzn.my.id"
+                  // Ganti href ini ke link resmi himatif kalo ada
+                  href="https://himatif.id" 
                   className="inline-flex items-center gap-2 px-4 py-2 sm:px-6 sm:py-3 rounded-full relative group hover:scale-105 transition-transform duration-300"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -161,7 +166,8 @@ const WelcomeScreen = ({ onLoadingComplete }) => {
                   <div className="relative flex items-center gap-2 text-lg sm:text-xl md:text-2xl">
                     <Globe className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" />
                     <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                      <TypewriterEffect text="rawrzn.my.id" />
+                      {/* Mengganti teks typewriter */}
+                      <TypewriterEffect text="HIMATIF Official" />
                     </span>
                   </div>
                 </a>

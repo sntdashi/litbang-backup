@@ -121,7 +121,7 @@ const techStacks = [
 export default function FullWidthTabs() {
   const theme = useTheme();
   const [value, setValue] = useState(0);
-  const [Proyek, setProjects] = useState([]);
+  const [projects, setProjects] = useState([]);
   const [certificates, setCertificates] = useState([]);
   const [showAllProjects, setShowAllProjects] = useState(false);
   const [showAllCertificates, setShowAllCertificates] = useState(false);
@@ -139,7 +139,7 @@ export default function FullWidthTabs() {
     try {
       // Mengambil data dari Supabase secara paralel
       const [projectsResponse, certificatesResponse] = await Promise.all([
-        supabase.from("Proyek").select("*").order('id', { ascending: true }),
+        supabase.from("projects").select("*").order('id', { ascending: true }),
         supabase.from("certificates").select("*").order('id', { ascending: true }), 
       ]);
 
@@ -155,7 +155,7 @@ export default function FullWidthTabs() {
       setCertificates(certificateData);
 
       // Store in localStorage (fungsionalitas ini tetap dipertahankan)
-      localStorage.setItem("Proyek", JSON.stringify(projectData));
+      localStorage.setItem("projects", JSON.stringify(projectData));
       localStorage.setItem("certificates", JSON.stringify(certificateData));
     } catch (error) {
       console.error("Error fetching data from Supabase:", error.message);
@@ -166,7 +166,7 @@ export default function FullWidthTabs() {
 
   useEffect(() => {
     // Coba ambil dari localStorage dulu untuk laod lebih cepat
-    const cachedProjects = localStorage.getItem('Proyek');
+    const cachedProjects = localStorage.getItem('projects');
     const cachedCertificates = localStorage.getItem('certificates');
 
     if (cachedProjects && cachedCertificates) {
@@ -182,19 +182,19 @@ export default function FullWidthTabs() {
   };
 
   const toggleShowMore = useCallback((type) => {
-    if (type === 'Proyek') {
+    if (type === 'projects') {
       setShowAllProjects(prev => !prev);
     } else {
       setShowAllCertificates(prev => !prev);
     }
   }, []);
 
-  const displayedProjects = showAllProjects ? Proyek : Proyek.slice(0, initialItems);
+  const displayedProjects = showAllProjects ? projects : projects.slice(0, initialItems);
   const displayedCertificates = showAllCertificates ? certificates : certificates.slice(0, initialItems);
 
   // Sisa dari komponen (return statement) tidak ada perubahan
   return (
-    <div className="md:px-[10%] px-[5%] w-full sm:mt-0 mt-[3rem] bg-[#030014] overflow-hidden" id="Litbang Web">
+    <div className="md:px-[10%] px-[5%] w-full sm:mt-0 mt-[3rem] bg-[#030014] overflow-hidden" id="Portofolio">
       {/* Header section - unchanged */}
       <div className="text-center pb-10" data-aos="fade-up" data-aos-duration="1000">
         <h2 className="inline-block text-3xl md:text-5xl font-bold text-center mx-auto text-transparent bg-clip-text bg-gradient-to-r from-[#6366f1] to-[#a855f7]">
@@ -205,11 +205,11 @@ export default function FullWidthTabs() {
             backgroundClip: 'text',
             WebkitTextFillColor: 'transparent'
           }}>
-            Litbang Web Showcase
+            Portfolio Showcase
           </span>
         </h2>
         <p className="text-slate-400 max-w-2xl mx-auto text-sm md:text-base mt-2">
-          Explore my journey through Proyek, certifications, and technical expertise. 
+          Explore my journey through projects, certifications, and technical expertise. 
           Each section represents a milestone in my continuous learning path.
         </p>
       </div>
@@ -285,7 +285,7 @@ export default function FullWidthTabs() {
           >
             <Tab
               icon={<Code className="mb-2 w-5 h-5 transition-all duration-300" />}
-              label="Proyek"
+              label="Projects"
               {...a11yProps(0)}
             />
             <Tab
@@ -326,10 +326,10 @@ export default function FullWidthTabs() {
                 ))}
               </div>
             </div>
-            {Proyek.length > initialItems && (
+            {projects.length > initialItems && (
               <div className="mt-6 w-full flex justify-start">
                 <ToggleButton
-                  onClick={() => toggleShowMore('Proyek')}
+                  onClick={() => toggleShowMore('projects')}
                   isShowingMore={showAllProjects}
                 />
               </div>

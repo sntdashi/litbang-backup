@@ -2,10 +2,10 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import React, { useState } from 'react';
 import "./index.css";
 import Home from "./Pages/Home";
-import Tentang from "./Pages/Tentang";
+import About from "./Pages/About";
 import AnimatedBackground from "./components/Background";
 import Navbar from "./components/Navbar";
-import LitbangWeb from "./Pages/LitbangWeb";
+import Portofolio from "./Pages/Portofolio";
 import ContactPage from "./Pages/Contact";
 import ProjectDetails from "./components/ProjectDetail";
 import WelcomeScreen from "./Pages/WelcomeScreen";
@@ -27,8 +27,8 @@ const LandingPage = ({ showWelcome, setShowWelcome }) => {
           <Navbar />
           <AnimatedBackground />
           <Home />
-          <Tentang />
-          <LitbangWeb />
+          <About />
+          <Portofolio />
           <ContactPage />
           <footer>
             <center>
@@ -36,7 +36,7 @@ const LandingPage = ({ showWelcome, setShowWelcome }) => {
               <span className="block text-sm pb-4 text-gray-500 text-center dark:text-gray-400">
                 © 2025{" "}
                 <a href="https://flowbite.com/" className="hover:underline">
-                  himatif
+                  rawrzn
                 </a>
                 . All Rights Reserved.
               </span>
