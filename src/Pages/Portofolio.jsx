@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 
+// Pastikan path import supabase ini udah bener
 import { supabase } from "../supabase"; 
 
 import PropTypes from "prop-types";
@@ -10,14 +11,16 @@ import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
-import CardProject from "../components/CardProject";
-import TechStackIcon from "../components/TechStackIcon";
+import CardProject from "../components/CardProject"; // Asumsi komponen ini ada
+import TechStackIcon from "../components/TechStackIcon"; // Asumsi komponen ini ada
 import AOS from "aos";
 import "aos/dist/aos.css";
-import Certificate from "../components/Certificate";
-import { Code, Award, Boxes } from "lucide-react";
+import Certificate from "../components/Certificate"; // Asumsi komponen ini ada
+// Perubahan: Ganti Award dengan FlaskConical (riset)
+import { Code, FlaskConical, Boxes } from "lucide-react";
 
 
+// ToggleButton: TIDAK DIUBAH (AMAN)
 const ToggleButton = ({ onClick, isShowingMore }) => (
   <button
     onClick={onClick}
@@ -70,7 +73,7 @@ const ToggleButton = ({ onClick, isShowingMore }) => (
   </button>
 );
 
-
+// TabPanel: TIDAK DIUBAH (AMAN)
 function TabPanel({ children, value, index, ...other }) {
   return (
     <div
@@ -102,7 +105,8 @@ function a11yProps(index) {
   };
 }
 
-// techStacks tetap sama
+// techStacks: TIDAK DIUBAH
+// Ini udah bagus, teknologi ini relevan untuk Litbang
 const techStacks = [
   { icon: "html.svg", language: "HTML" },
   { icon: "css.svg", language: "CSS" },
@@ -121,10 +125,15 @@ const techStacks = [
 export default function FullWidthTabs() {
   const theme = useTheme();
   const [value, setValue] = useState(0);
-  const [projects, setProjects] = useState([]);
-  const [certificates, setCertificates] = useState([]);
-  const [showAllProjects, setShowAllProjects] = useState(false);
-  const [showAllCertificates, setShowAllCertificates] = useState(false);
+
+  // --- Perubahan State ---
+  // State diganti namanya biar sesuai konteks
+  const [prokerList, setProkerList] = useState([]);
+  const [workshopList, setWorkshopList] = useState([]);
+  const [showAllProker, setShowAllProker] = useState(false);
+  const [showAllWorkshop, setShowAllWorkshop] = useState(false);
+  // --- Akhir Perubahan State ---
+
   const isMobile = window.innerWidth < 768;
   const initialItems = isMobile ? 4 : 6;
 
@@ -134,68 +143,71 @@ export default function FullWidthTabs() {
     });
   }, []);
 
-
+  // --- Perubahan Data Fetching ---
   const fetchData = useCallback(async () => {
     try {
-      // Mengambil data dari Supabase secara paralel
-      const [projectsResponse, certificatesResponse] = await Promise.all([
-        supabase.from("projects").select("*").order('id', { ascending: true }),
-        supabase.from("certificates").select("*").order('id', { ascending: true }), 
+      // Mengambil data dari tabel 'proker' dan 'workshop'
+      const [prokerResponse, workshopResponse] = await Promise.all([
+        supabase.from("proker").select("*").order('id', { ascending: true }), // Diubah: projects -> proker
+        supabase.from("workshop").select("*").order('id', { ascending: true }), // Diubah: certificates -> workshop
       ]);
 
-      // Error handling untuk setiap request
-      if (projectsResponse.error) throw projectsResponse.error;
-      if (certificatesResponse.error) throw certificatesResponse.error;
+      if (prokerResponse.error) throw prokerResponse.error;
+      if (workshopResponse.error) throw workshopResponse.error;
 
-      // Supabase mengembalikan data dalam properti 'data'
-      const projectData = projectsResponse.data || [];
-      const certificateData = certificatesResponse.data || [];
+      const prokerData = prokerResponse.data || [];
+      const workshopData = workshopResponse.data || [];
 
-      setProjects(projectData);
-      setCertificates(certificateData);
+      setProkerList(prokerData); // Diubah: setProjects -> setProkerList
+      setWorkshopList(workshopData); // Diubah: setCertificates -> setWorkshopList
 
-      // Store in localStorage (fungsionalitas ini tetap dipertahankan)
-      localStorage.setItem("projects", JSON.stringify(projectData));
-      localStorage.setItem("certificates", JSON.stringify(certificateData));
+      // Simpan ke localStorage dengan key baru
+      localStorage.setItem("proker", JSON.stringify(prokerData)); // Diubah: projects -> proker
+      localStorage.setItem("workshop", JSON.stringify(workshopData)); // Diubah: certificates -> workshop
     } catch (error) {
       console.error("Error fetching data from Supabase:", error.message);
     }
   }, []);
+  // --- Akhir Perubahan Data Fetching ---
 
-
-
+  // --- Perubahan useEffect (Cache) ---
   useEffect(() => {
-    // Coba ambil dari localStorage dulu untuk laod lebih cepat
-    const cachedProjects = localStorage.getItem('projects');
-    const cachedCertificates = localStorage.getItem('certificates');
+    // Ambil dari localStorage dengan key baru
+    const cachedProker = localStorage.getItem('proker'); // Diubah: projects -> proker
+    const cachedWorkshop = localStorage.getItem('workshop'); // Diubah: certificates -> workshop
 
-    if (cachedProjects && cachedCertificates) {
-        setProjects(JSON.parse(cachedProjects));
-        setCertificates(JSON.parse(cachedCertificates));
+    if (cachedProker && cachedWorkshop) {
+        setProkerList(JSON.parse(cachedProker)); // Diubah: setProjects -> setProkerList
+        setWorkshopList(JSON.parse(cachedWorkshop)); // Diubah: setCertificates -> setWorkshopList
     }
     
     fetchData(); // Tetap panggil fetchData untuk sinkronisasi data terbaru
   }, [fetchData]);
+  // --- Akhir Perubahan useEffect (Cache) ---
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
 
+  // --- Perubahan Toggle "See More" ---
   const toggleShowMore = useCallback((type) => {
-    if (type === 'projects') {
-      setShowAllProjects(prev => !prev);
-    } else {
-      setShowAllCertificates(prev => !prev);
+    if (type === 'proker') { // Diubah: 'projects' -> 'proker'
+      setShowAllProker(prev => !prev); // Diubah: setShowAllProjects -> setShowAllProker
+    } else if (type === 'workshop') { // Diubah: 'certificates' -> 'workshop'
+      setShowAllWorkshop(prev => !prev); // Diubah: setShowAllCertificates -> setShowAllWorkshop
     }
   }, []);
 
-  const displayedProjects = showAllProjects ? projects : projects.slice(0, initialItems);
-  const displayedCertificates = showAllCertificates ? certificates : certificates.slice(0, initialItems);
+  // Diubah: variabel disesuaikan
+  const displayedProker = showAllProker ? prokerList : prokerList.slice(0, initialItems);
+  const displayedWorkshop = showAllWorkshop ? workshopList : workshopList.slice(0, initialItems);
+  // --- Akhir Perubahan Toggle ---
 
-  // Sisa dari komponen (return statement) tidak ada perubahan
   return (
-    <div className="md:px-[10%] px-[5%] w-full sm:mt-0 mt-[3rem] bg-[#030014] overflow-hidden" id="Portofolio">
-      {/* Header section - unchanged */}
+    // Diubah: id="Portofolio" -> id="proker" (biar nyambung sama link di Home/About)
+    <div className="md:px-[10%] px-[5%] w-full sm:mt-0 mt-[3rem] bg-[#030014] overflow-hidden" id="proker">
+      
+      {/* --- Perubahan Header --- */}
       <div className="text-center pb-10" data-aos="fade-up" data-aos-duration="1000">
         <h2 className="inline-block text-3xl md:text-5xl font-bold text-center mx-auto text-transparent bg-clip-text bg-gradient-to-r from-[#6366f1] to-[#a855f7]">
           <span style={{
@@ -205,17 +217,19 @@ export default function FullWidthTabs() {
             backgroundClip: 'text',
             WebkitTextFillColor: 'transparent'
           }}>
-            Portfolio Showcase
+            {/* Diubah: Teks Judul */}
+            Program Kerja Litbang
           </span>
         </h2>
         <p className="text-slate-400 max-w-2xl mx-auto text-sm md:text-base mt-2">
-          Explore my journey through projects, certifications, and technical expertise. 
-          Each section represents a milestone in my continuous learning path.
+          {/* Diubah: Teks Deskripsi */}
+          Lihat berbagai program kerja, workshop, dan riset yang telah kami kembangkan untuk Himpunan.
         </p>
       </div>
+      {/* --- Akhir Perubahan Header --- */}
 
       <Box sx={{ width: "100%" }}>
-        {/* AppBar and Tabs section - unchanged */}
+        {/* AppBar/Tabs: Style TIDAK DIUBAH (AMAN) */}
         <AppBar
           position="static"
           elevation={0}
@@ -239,7 +253,7 @@ export default function FullWidthTabs() {
           }}
           className="md:px-4"
         >
-          {/* Tabs remain unchanged */}
+          {/* --- Perubahan Label & Ikon Tabs --- */}
           <Tabs
             value={value}
             onChange={handleChange}
@@ -285,20 +299,21 @@ export default function FullWidthTabs() {
           >
             <Tab
               icon={<Code className="mb-2 w-5 h-5 transition-all duration-300" />}
-              label="Projects"
+              label="Program Kerja" // Diubah: Label
               {...a11yProps(0)}
             />
             <Tab
-              icon={<Award className="mb-2 w-5 h-5 transition-all duration-300" />}
-              label="Certificates"
+              icon={<FlaskConical className="mb-2 w-5 h-5 transition-all duration-300" />} // Diubah: Ikon
+              label="Workshop & Riset" // Diubah: Label
               {...a11yProps(1)}
             />
             <Tab
               icon={<Boxes className="mb-2 w-5 h-5 transition-all duration-300" />}
-              label="Tech Stack"
+              label="Fokus Teknologi" // Diubah: Label
               {...a11yProps(2)}
             />
           </Tabs>
+          {/* --- Akhir Perubahan Tabs --- */}
         </AppBar>
 
         <SwipeableViews
@@ -306,60 +321,72 @@ export default function FullWidthTabs() {
           index={value}
           onChangeIndex={setValue}
         >
+          {/* --- Perubahan TabPanel 0 (Program Kerja) --- */}
           <TabPanel value={value} index={0} dir={theme.direction}>
             <div className="container mx-auto flex justify-center items-center overflow-hidden">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-3 gap-5">
-                {displayedProjects.map((project, index) => (
+                {/* Diubah: displayedProjects -> displayedProker */}
+                {displayedProker.map((proker, index) => ( 
                   <div
-                    key={project.id || index}
+                    key={proker.id || index} // Diubah: project.id -> proker.id
                     data-aos={index % 3 === 0 ? "fade-up-right" : index % 3 === 1 ? "fade-up" : "fade-up-left"}
                     data-aos-duration={index % 3 === 0 ? "1000" : index % 3 === 1 ? "1200" : "1000"}
                   >
+                    {/* Diubah: props disesuaikan dengan 'proker' */}
                     <CardProject
-                      Img={project.Img}
-                      Title={project.Title}
-                      Description={project.Description}
-                      Link={project.Link}
-                      id={project.id}
+                      Img={proker.Img}
+                      Title={proker.Title}
+                      Description={proker.Description}
+                      Link={proker.Link}
+                      id={proker.id}
                     />
                   </div>
                 ))}
               </div>
             </div>
-            {projects.length > initialItems && (
+            {/* Diubah: Cek panjang 'prokerList' */}
+            {prokerList.length > initialItems && (
               <div className="mt-6 w-full flex justify-start">
                 <ToggleButton
-                  onClick={() => toggleShowMore('projects')}
-                  isShowingMore={showAllProjects}
+                  onClick={() => toggleShowMore('proker')} // Diubah: 'projects' -> 'proker'
+                  isShowingMore={showAllProker} // Diubah: showAllProjects -> showAllProker
                 />
               </div>
             )}
           </TabPanel>
+          {/* --- Akhir Perubahan TabPanel 0 --- */}
 
+          {/* --- Perubahan TabPanel 1 (Workshop & Riset) --- */}
           <TabPanel value={value} index={1} dir={theme.direction}>
             <div className="container mx-auto flex justify-center items-center overflow-hidden">
               <div className="grid grid-cols-1 md:grid-cols-3 md:gap-5 gap-4">
-                {displayedCertificates.map((certificate, index) => (
+                {/* Diubah: displayedCertificates -> displayedWorkshop */}
+                {displayedWorkshop.map((workshop, index) => (
                   <div
-                    key={certificate.id || index}
+                    key={workshop.id || index} // Diubah: certificate.id -> workshop.id
                     data-aos={index % 3 === 0 ? "fade-up-right" : index % 3 === 1 ? "fade-up" : "fade-up-left"}
                     data-aos-duration={index % 3 === 0 ? "1000" : index % 3 === 1 ? "1200" : "1000"}
                   >
-                    <Certificate ImgSertif={certificate.Img} />
+                    {/* Asumsi tabel 'workshop' punya kolom 'Img' */}
+                    <Certificate ImgSertif={workshop.Img} /> 
                   </div>
                 ))}
               </div>
             </div>
-            {certificates.length > initialItems && (
+            {/* Diubah: Cek panjang 'workshopList' */}
+            {workshopList.length > initialItems && (
               <div className="mt-6 w-full flex justify-start">
                 <ToggleButton
-                  onClick={() => toggleShowMore('certificates')}
-                  isShowingMore={showAllCertificates}
+                  onClick={() => toggleShowMore('workshop')} // Diubah: 'certificates' -> 'workshop'
+                  isShowingMore={showAllWorkshop} // Diubah: showAllCertificates -> showAllWorkshop
                 />
               </div>
             )}
           </TabPanel>
-
+          {/* --- Akhir Perubahan TabPanel 1 --- */}
+          
+          {/* --- TabPanel 2 (Fokus Teknologi) --- */}
+          {/* TIDAK ADA PERUBAHAN LOGIC, karena 'techStacks' statis dan relevan */}
           <TabPanel value={value} index={2} dir={theme.direction}>
             <div className="container mx-auto flex justify-center items-center overflow-hidden pb-[5%]"> 
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 lg:gap-8 gap-5">
@@ -375,6 +402,8 @@ export default function FullWidthTabs() {
               </div>
             </div>
           </TabPanel>
+          {/* --- Akhir TabPanel 2 --- */}
+
         </SwipeableViews>
       </Box>
     </div>

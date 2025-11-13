@@ -1,9 +1,12 @@
-import React, { useEffect, memo, useMemo } from "react"
-import { FileText, Code, Award, Globe, ArrowUpRight, Sparkles, UserCheck } from "lucide-react"
+import React, { useEffect, memo, useMemo, useState } from "react"
+// Perubahan: Import icon baru (FlaskConical, Users, Brain) dan hapus yg lama (Award, Globe)
+import { FileText, Code, Sparkles, ArrowUpRight, FlaskConical, Users, Brain } from "lucide-react"
 import AOS from 'aos'
 import 'aos/dist/aos.css'
+// WAJIB: Import Supabase client lu
+import { supabase } from "../supabaseClient" 
 
-// Memoized Components
+// --- Header Component (Sudah diubah) ---
 const Header = memo(() => (
   <div className="text-center lg:mb-8 mb-2 px-[5%]">
     <div className="inline-block relative group">
@@ -12,7 +15,8 @@ const Header = memo(() => (
         data-aos="zoom-in-up"
         data-aos-duration="600"
       >
-        About Me
+        {/* Diubah: About Me -> Tentang Litbang */}
+        Tentang Litbang
       </h2>
     </div>
     <p 
@@ -21,12 +25,14 @@ const Header = memo(() => (
       data-aos-duration="800"
     >
       <Sparkles className="w-5 h-5 text-purple-400" />
-      Transforming ideas into digital experiences
+      {/* Diubah: Teks personal -> Motto Litbang */}
+      Inovasi, Riset, dan Pengembangan Teknologi
       <Sparkles className="w-5 h-5 text-purple-400" />
     </p>
   </div>
 ));
 
+// --- ProfileImage Component (Sudah diubah) ---
 const ProfileImage = memo(() => (
   <div className="flex justify-end items-center sm:p-12 sm:py-0 sm:pb-0 p-0 py-2 pb-2">
     <div 
@@ -34,7 +40,7 @@ const ProfileImage = memo(() => (
       data-aos="fade-up"
       data-aos-duration="1000"
     >
-      {/* Optimized gradient backgrounds with reduced complexity for mobile */}
+      {/* Animasi & Style: TIDAK DIUBAH (AMAN) */}
       <div className="absolute -inset-6 opacity-[25%] z-0 hidden sm:block">
         <div className="absolute inset-0 bg-gradient-to-r from-violet-600 via-indigo-500 to-purple-600 rounded-full blur-2xl animate-spin-slower" />
         <div className="absolute inset-0 bg-gradient-to-l from-fuchsia-500 via-rose-500 to-pink-600 rounded-full blur-2xl animate-pulse-slow opacity-50" />
@@ -45,18 +51,20 @@ const ProfileImage = memo(() => (
         <div className="w-72 h-72 sm:w-80 sm:h-80 rounded-full overflow-hidden shadow-[0_0_40px_rgba(120,119,198,0.3)] transform transition-all duration-700 group-hover:scale-105">
           <div className="absolute inset-0 border-4 border-white/20 rounded-full z-20 transition-all duration-700 group-hover:border-white/40 group-hover:scale-105" />
           
-          {/* Optimized overlay effects - disabled on mobile */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/40 z-10 transition-opacity duration-700 group-hover:opacity-0 hidden sm:block" />
           <div className="absolute inset-0 bg-gradient-to-t from-purple-500/20 via-transparent to-blue-500/20 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-700 hidden sm:block" />
           
           <img
-            src="/Photo.jpg"
-            alt="Profile"
+            // Diubah: src foto pribadi -> src logo/tim
+            // WAJIB: Taruh gambar lu di public/images/logo-litbang.png
+            src="/images/logo-litbang.png"
+            // Diubah: alt
+            alt="Logo Litbang HIMATIF"
             className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:rotate-2"
             loading="lazy"
           />
 
-          {/* Advanced hover effects - desktop only */}
+          {/* Animasi & Style: TIDAK DIUBAH (AMAN) */}
           <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-700 z-20 hidden sm:block">
             <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
             <div className="absolute inset-0 bg-gradient-to-bl from-transparent via-white/10 to-transparent transform translate-y-full group-hover:-translate-y-full transition-transform duration-1000 delay-100" />
@@ -68,6 +76,9 @@ const ProfileImage = memo(() => (
   </div>
 ));
 
+// --- StatCard Component (TIDAK DIUBAH) ---
+// Komponen ini udah bagus, gaperlu diubah, 
+// datanya kita ubah dari parent-nya.
 const StatCard = memo(({ icon: Icon, color, value, label, description, animation }) => (
   <div data-aos={animation} data-aos-duration={1300} className="relative group">
     <div className="relative z-10 bg-gray-900/50 backdrop-blur-lg rounded-2xl p-6 border border-white/10 overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-2xl h-full flex flex-col justify-between">
@@ -83,6 +94,7 @@ const StatCard = memo(({ icon: Icon, color, value, label, description, animation
           data-aos-duration="1500"
           data-aos-anchor-placement="top-bottom"
         >
+          {/* Nilai (value) akan diisi dari state Supabase */}
           {value}
         </span>
       </div>
@@ -112,41 +124,52 @@ const StatCard = memo(({ icon: Icon, color, value, label, description, animation
   </div>
 ));
 
+// --- AboutPage Component (Perubahan Besar di Logic) ---
 const AboutPage = () => {
-  // Memoized calculations
-  const { totalProjects, totalCertificates, YearExperience } = useMemo(() => {
-    const storedProjects = JSON.parse(localStorage.getItem("projects") || "[]");
-    const storedCertificates = JSON.parse(localStorage.getItem("certificates") || "[]");
-    
-    const startDate = new Date("2021-11-06");
-    const today = new Date();
-    const experience = today.getFullYear() - startDate.getFullYear() -
-      (today < new Date(today.getFullYear(), startDate.getMonth(), startDate.getDate()) ? 1 : 0);
+  // Diubah: Menggunakan useState untuk data dinamis dari Supabase
+  const [prokerCount, setProkerCount] = useState(0);
+  const [workshopCount, setWorkshopCount] = useState(0);
+  const [anggotaCount, setAnggotaCount] = useState(0);
 
-    return {
-      totalProjects: storedProjects.length,
-      totalCertificates: storedCertificates.length,
-      YearExperience: experience
+  // Fungsi untuk fetch data count dari Supabase
+  useEffect(() => {
+    const fetchStats = async () => {
+      // 1. Hitung jumlah Program Kerja (dari tabel 'proker')
+      const { count: prokerData, error: prokerError } = await supabase
+        .from('proker') // GANTI 'proker' kalo nama tabel lu beda
+        .select('*', { count: 'exact', head: true });
+      if (!prokerError) setProkerCount(prokerData);
+
+      // 2. Hitung jumlah Workshop (dari tabel 'workshop')
+      const { count: workshopData, error: workshopError } = await supabase
+        .from('workshop') // GANTI 'workshop' kalo nama tabel lu beda
+        .select('*', { count: 'exact', head: true });
+      if (!workshopError) setWorkshopCount(workshopData);
+
+      // 3. Hitung jumlah Anggota (dari tabel 'anggota')
+      const { count: anggotaData, error: anggotaError } = await supabase
+        .from('anggota') // GANTI 'anggota' kalo nama tabel lu beda
+        .select('*', { count: 'exact', head: true });
+      if (!anggotaError) setAnggotaCount(anggotaData);
     };
-  }, []);
 
-  // Optimized AOS initialization
+    fetchStats();
+  }, []); // [] = Jalankan sekali pas komponen dimuat
+
+  // Optimized AOS initialization (TIDAK DIUBAH)
   useEffect(() => {
     const initAOS = () => {
       AOS.init({
         once: false, 
       });
     };
-
     initAOS();
     
-    // Debounced resize handler
     let resizeTimer;
     const handleResize = () => {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(initAOS, 250);
     };
-
     window.addEventListener('resize', handleResize);
     return () => {
       window.removeEventListener('resize', handleResize);
@@ -154,33 +177,33 @@ const AboutPage = () => {
     };
   }, []);
 
-  // Memoized stats data
+  // Diubah: statsData sekarang pake data dari state (Supabase)
   const statsData = useMemo(() => [
     {
-      icon: Code,
+      icon: Code, // Icon tetap
       color: "from-[#6366f1] to-[#a855f7]",
-      value: totalProjects,
-      label: "Total Projects",
-      description: "Innovative web solutions crafted",
+      value: prokerCount, // Data dari state
+      label: "Total Program Kerja", // Teks diubah
+      description: "Solusi inovatif untuk Himpunan", // Teks diubah
       animation: "fade-right",
     },
     {
-      icon: Award,
+      icon: FlaskConical, // Icon diubah
       color: "from-[#a855f7] to-[#6366f1]",
-      value: totalCertificates,
-      label: "Certificates",
-      description: "Professional skills validated",
+      value: workshopCount, // Data dari state
+      label: "Riset & Workshop", // Teks diubah
+      description: "Mengembangkan wawasan & skill", // Teks diubah
       animation: "fade-up",
     },
     {
-      icon: Globe,
+      icon: Users, // Icon diubah
       color: "from-[#6366f1] to-[#a855f7]",
-      value: YearExperience,
-      label: "Years of Experience",
-      description: "Continuous learning journey",
+      value: anggotaCount, // Data dari state
+      label: "Total Anggota Aktif", // Teks diubah
+      description: "Tim solid penuh talenta", // Teks diubah
       animation: "fade-left",
     },
-  ], [totalProjects, totalCertificates, YearExperience]);
+  ], [prokerCount, workshopCount, anggotaCount]); // Dependency diubah ke state
 
   return (
     <div
@@ -192,71 +215,78 @@ const AboutPage = () => {
       <div className="w-full mx-auto pt-8 sm:pt-12 relative">
         <div className="flex flex-col-reverse lg:grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
           <div className="space-y-6 text-center lg:text-left">
+            {/* --- Teks Judul (Diubah) --- */}
             <h2 
               className="text-3xl sm:text-4xl lg:text-5xl font-bold"
               data-aos="fade-right"
               data-aos-duration="1000"
             >
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#6366f1] to-[#a855f7]">
-                Hello, My Name Is
+                {/* Diubah: Teks personal */}
+                Selamat Datang di
               </span>
               <span 
                 className="block mt-2 text-gray-200"
                 data-aos="fade-right"
                 data-aos-duration="1300"
               >
-                Rauzzan Muhamad Fikri
+                {/* Diubah: Teks personal */}
+                Departemen Litbang
               </span>
             </h2>
             
+            {/* --- Teks Paragraf (Diubah) --- */}
             <p 
               className="text-base sm:text-lg lg:text-xl text-gray-400 leading-relaxed text-justify pb-4 sm:pb-0"
               data-aos="fade-right"
               data-aos-duration="1500"
             >
-             Seorang lulusan Teknik Jaringan Komputer dan Telekomunikasi yang memiliki ketertarikan besar dalam dunia Pemograman. Dan kini mengambil S1 Teknik Informatika di STIMIK IKMI Cirebon, Saya berfokus pada menciptakan pengalaman digital yang menarik dan selalu berusaha memberikan solusi terbaik dalam setiap proyek yang saya kerjakan.
+             {/* Diubah: Teks personal -> Deskripsi Litbang */}
+             Departemen Penelitian dan Pengembangan (Litbang) adalah jantung inovasi di HIMATIF. Kami berfokus pada riset teknologi, pengembangan proyek internal, dan menyelenggarakan workshop untuk meningkatkan skill anggota. Misi kami adalah menciptakan ekosistem teknologi yang kreatif dan solutif.
             </p>
 
-               {/* Quote Section */}
-      <div 
-        className="relative bg-gradient-to-br from-[#6366f1]/5 via-transparent to-[#a855f7]/5 border border-gradient-to-r border-[#6366f1]/30 rounded-2xl p-4 my-6 backdrop-blur-md shadow-2xl overflow-hidden"
-        data-aos="fade-up"
-        data-aos-duration="1700"
-      >
-        {/* Floating orbs background */}
-        <div className="absolute top-2 right-4 w-16 h-16 bg-gradient-to-r from-[#6366f1]/20 to-[#a855f7]/20 rounded-full blur-xl"></div>
-        <div className="absolute -bottom-4 -left-2 w-12 h-12 bg-gradient-to-r from-[#a855f7]/20 to-[#6366f1]/20 rounded-full blur-lg"></div>
-        
-        {/* Quote icon */}
-        <div className="absolute top-3 left-4 text-[#6366f1] opacity-30">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h4v10h-10z"/>
-          </svg>
-        </div>
-        
-        <blockquote className="text-gray-300 text-center lg:text-left italic font-medium text-sm relative z-10 pl-6">
-          "Leveraging AI as a professional tool, not a replacement."
-        </blockquote>
-      </div>
+            {/* --- Quote Section (Diubah) --- */}
+            <div 
+              className="relative bg-gradient-to-br from-[#6366f1]/5 via-transparent to-[#a855f7]/5 border border-gradient-to-r border-[#6366f1]/30 rounded-2xl p-4 my-6 backdrop-blur-md shadow-2xl overflow-hidden"
+              data-aos="fade-up"
+              data-aos-duration="1700"
+            >
+              {/* Style: TIDAK DIUBAH (AMAN) */}
+              <div className="absolute top-2 right-4 w-16 h-16 bg-gradient-to-r from-[#6366f1]/20 to-[#a855f7]/20 rounded-full blur-xl"></div>
+              <div className="absolute -bottom-4 -left-2 w-12 h-12 bg-gradient-to-r from-[#a855f7]/20 to-[#6366f1]/20 rounded-full blur-lg"></div>
+              <div className="absolute top-3 left-4 text-[#6366f1] opacity-30">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h4v10h-10z"/>
+                </svg>
+              </div>
+              
+              <blockquote className="text-gray-300 text-center lg:text-left italic font-medium text-sm relative z-10 pl-6">
+                {/* Diubah: Quote personal -> Motto Litbang */}
+                "Think, Create, Innovate."
+              </blockquote>
+            </div>
 
+            {/* --- Tombol/CTA (Diubah) --- */}
             <div className="flex flex-col lg:flex-row items-center lg:items-start gap-4 lg:gap-4 lg:px-0 w-full">
-              <a href="https://drive.google.com/drive/" className="w-full lg:w-auto">
-              <button 
-                data-aos="fade-up"
-                data-aos-duration="800"
-                className="w-full lg:w-auto sm:px-6 py-2 sm:py-3 rounded-lg bg-gradient-to-r from-[#6366f1] to-[#a855f7] text-white font-medium transition-all duration-300 hover:scale-105 flex items-center justify-center lg:justify-start gap-2 shadow-lg hover:shadow-xl "
-              >
-                <FileText className="w-4 h-4 sm:w-5 sm:h-5" /> Download CV
-              </button>
+              {/* Diubah: Tombol CV -> Struktur Organisasi */}
+              <a href="#struktur" className="w-full lg:w-auto"> 
+                <button 
+                  data-aos="fade-up"
+                  data-aos-duration="800"
+                  className="w-full lg:w-auto sm:px-6 py-2 sm:py-3 rounded-lg bg-gradient-to-r from-[#6366f1] to-[#a855f7] text-white font-medium transition-all duration-300 hover:scale-105 flex items-center justify-center lg:justify-start gap-2 shadow-lg hover:shadow-xl "
+                >
+                  <FileText className="w-4 h-4 sm:w-5 sm:h-5" /> Struktur Organisasi
+                </button>
               </a>
-              <a href="#Portofolio" className="w-full lg:w-auto">
-              <button 
-                data-aos="fade-up"
-                data-aos-duration="1000"
-                className="w-full lg:w-auto sm:px-6 py-2 sm:py-3 rounded-lg border border-[#a855f7]/50 text-[#a855f7] font-medium transition-all duration-300 hover:scale-105 flex items-center justify-center lg:justify-start gap-2 hover:bg-[#a855f7]/10 "
-              >
-                <Code className="w-4 h-4 sm:w-5 sm:h-5" /> View Projects
-              </button>
+              {/* Diubah: Tombol Projects -> Program Kerja */}
+              <a href="#proker" className="w-full lg:w-auto"> 
+                <button 
+                  data-aos="fade-up"
+                  data-aos-duration="1000"
+                  className="w-full lg:w-auto sm:px-6 py-2 sm:py-3 rounded-lg border border-[#a855f7]/50 text-[#a855f7] font-medium transition-all duration-300 hover:scale-105 flex items-center justify-center lg:justify-start gap-2 hover:bg-[#a855f7]/10 "
+                >
+                  <Code className="w-4 h-4 sm:w-5 sm:h-5" /> Lihat Program Kerja
+                </button>
               </a>
             </div>
           </div>
@@ -264,7 +294,9 @@ const AboutPage = () => {
           <ProfileImage />
         </div>
 
-        <a href="#Portofolio">
+        {/* --- StatCards Section (Diubah) --- */}
+        {/* Diubah: href link ke #proker */}
+        <a href="#proker">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16 cursor-pointer">
             {statsData.map((stat) => (
               <StatCard key={stat.label} {...stat} />
@@ -273,6 +305,7 @@ const AboutPage = () => {
         </a>
       </div>
 
+      {/* Style: TIDAK DIUBAH (AMAN) */}
       <style jsx>{`
         @keyframes float {
           0%, 100% { transform: translateY(0); }

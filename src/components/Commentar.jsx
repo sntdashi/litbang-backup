@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
-import { createClient } from '@supabase/supabase-js';
+// import { createClient } from '@supabase/supabase-js'; // Ini ga perlu, udah di-import di bawah
 import { MessageCircle, UserCircle2, Loader2, AlertCircle, Send, ImagePlus, X, Pin } from 'lucide-react';
 import AOS from "aos";
 import "aos/dist/aos.css";
-import { supabase } from '../supabase';
+// Path import-nya udah bener, kita pake file lu
+import { supabase } from '../supabase'; 
 
 
+// Comment Component: TIDAK DIUBAH (AMAN)
 const Comment = memo(({ comment, formatDate, index, isPinned = false }) => (
     <div 
         className={`px-4 pt-4 pb-2 rounded-xl border transition-all group hover:shadow-lg hover:-translate-y-0.5 ${
@@ -63,6 +65,8 @@ const Comment = memo(({ comment, formatDate, index, isPinned = false }) => (
     </div>
 ));
 
+// CommentForm Component: TIDAK DIUBAH (AMAN)
+// Logic form & UI-nya udah perfect.
 const CommentForm = memo(({ onSubmit, isSubmitting, error }) => {
     const [newComment, setNewComment] = useState('');
     const [userName, setUserName] = useState('');
@@ -77,7 +81,6 @@ const CommentForm = memo(({ onSubmit, isSubmitting, error }) => {
             // Check file size (5MB limit)
             if (file.size > 5 * 1024 * 1024) {
                 alert('File size must be less than 5MB. Please choose a smaller image.');
-                // Reset the input
                 if (e.target) e.target.value = '';
                 return;
             }
@@ -142,7 +145,6 @@ const CommentForm = memo(({ onSubmit, isSubmitting, error }) => {
                     ref={textareaRef}
                     value={newComment}
                      maxLength={200}
-
                     onChange={handleTextareaChange}
                     placeholder="Write your message here..."
                     className="w-full p-4 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all resize-none min-h-[120px]"
@@ -225,6 +227,7 @@ const CommentForm = memo(({ onSubmit, isSubmitting, error }) => {
     );
 });
 
+// --- Komentar Component (Logic Inti) ---
 const Komentar = () => {
     const [comments, setComments] = useState([]);
     const [pinnedComment, setPinnedComment] = useState(null);
@@ -232,19 +235,19 @@ const Komentar = () => {
     const [error, setError] = useState('');
 
     useEffect(() => {
-        // Initialize AOS
         AOS.init({
             once: false,
             duration: 1000,
         });
     }, []);
 
-    // Fetch pinned comment
+    // Fetch pinned comment (dari tabel baru)
     useEffect(() => {
         const fetchPinnedComment = async () => {
             try {
+                // Diubah: portfolio_comments -> litbang_guestbook
                 const { data, error } = await supabase
-                    .from('portfolio_comments')
+                    .from('litbang_guestbook') 
                     .select('*')
                     .eq('is_pinned', true)
                     .single();
@@ -261,15 +264,15 @@ const Komentar = () => {
                 console.error('Error fetching pinned comment:', error);
             }
         };
-
         fetchPinnedComment();
     }, []);
 
-    // Fetch regular comments (excluding pinned) and set up real-time subscription
+    // Fetch regular comments (dari tabel baru) dan set up real-time
     useEffect(() => {
         const fetchComments = async () => {
+            // Diubah: portfolio_comments -> litbang_guestbook
             const { data, error } = await supabase
-                .from('portfolio_comments')
+                .from('litbang_guestbook')
                 .select('*')
                 .eq('is_pinned', false)
                 .order('created_at', { ascending: false });
@@ -284,18 +287,19 @@ const Komentar = () => {
 
         fetchComments();
 
-        // Set up real-time subscription
+        // Set up real-time subscription (channel baru)
+        // Diubah: portfolio_comments -> litbang_guestbook_channel
         const subscription = supabase
-            .channel('portfolio_comments')
+            .channel('litbang_guestbook_channel') 
             .on('postgres_changes', 
                 { 
                     event: '*', 
                     schema: 'public', 
-                    table: 'portfolio_comments',
+                    table: 'litbang_guestbook', // Diubah: nama tabel
                     filter: 'is_pinned=eq.false'
                 }, 
                 () => {
-                    fetchComments(); // Refresh comments when changes occur
+                    fetchComments(); // Refresh comments
                 }
             )
             .subscribe();
@@ -305,15 +309,18 @@ const Komentar = () => {
         };
     }, []);
 
+    // Upload image (ke folder baru)
     const uploadImage = useCallback(async (imageFile) => {
         if (!imageFile) return null;
         
         const fileExt = imageFile.name.split('.').pop();
         const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
-        const filePath = `profile-images/${fileName}`;
+        // Diubah: path folder di dalam bucket
+        const filePath = `guestbook_litbang/${fileName}`; 
 
+        // Bucket 'profile-images' tetap, cuma path/folder-nya yg ganti
         const { error: uploadError } = await supabase.storage
-            .from('profile-images')
+            .from('profile-images') 
             .upload(filePath, imageFile);
 
         if (uploadError) {
@@ -327,6 +334,7 @@ const Komentar = () => {
         return data.publicUrl;
     }, []);
 
+    // Submit comment (ke tabel baru)
     const handleCommentSubmit = useCallback(async ({ newComment, userName, imageFile }) => {
         setError('');
         setIsSubmitting(true);
@@ -334,8 +342,9 @@ const Komentar = () => {
         try {
             const profileImageUrl = await uploadImage(imageFile);
             
+            // Diubah: portfolio_comments -> litbang_guestbook
             const { error } = await supabase
-                .from('portfolio_comments')
+                .from('litbang_guestbook')
                 .insert([
                     {
                         content: newComment,
@@ -357,6 +366,7 @@ const Komentar = () => {
         }
     }, [uploadImage]);
 
+    // formatDate: TIDAK DIUBAH (AMAN)
     const formatDate = useCallback((timestamp) => {
         if (!timestamp) return '';
         const date = new Date(timestamp);
@@ -377,9 +387,10 @@ const Komentar = () => {
         }).format(date);
     }, []);
 
-    // Calculate total comments (pinned + regular)
+    // totalComments: TIDAK DIUBAH (AMAN)
     const totalComments = comments.length + (pinnedComment ? 1 : 0);
 
+    // Render JSX: TIDAK DIUBAH (AMAN)
     return (
         <div className="w-full bg-gradient-to-b from-white/10 to-white/5 rounded-2xl  backdrop-blur-xl shadow-xl" data-aos="fade-up" data-aos-duration="1000">
             <div className="p-6 border-b border-white/10" data-aos="fade-down" data-aos-duration="800">
@@ -436,6 +447,7 @@ const Komentar = () => {
                     )}
                 </div>
             </div>
+            {/* Style JSX: TIDAK DIUBAH (AMAN) */}
             <style jsx>{`
                 .custom-scrollbar::-webkit-scrollbar {
                     width: 6px;

@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
+// Perubahan: Kita import 'supabase' di sini buat persiapan Komentar
+import { supabase } from "../supabaseClient"; // Asumsi nama filenya 'supabaseClient.js'
 import { Share2, User, Mail, MessageSquare, Send } from "lucide-react";
 import { Link } from "react-router-dom";
-import SocialLinks from "../components/SocialLinks";
-import Komentar from "../components/Commentar";
+import SocialLinks from "../components/SocialLinks"; // WAJIB: Edit file ini, ganti link sosmednya!
+import Komentar from "../components/Commentar"; // NEXT STEP: Kirim file ini!
 import Swal from "sweetalert2";
 import AOS from "aos";
 import "aos/dist/aos.css";
@@ -22,6 +24,8 @@ const ContactPage = () => {
     });
   }, []);
 
+  // Logic handleChange & handleSubmit: TIDAK DIUBAH (AMAN)
+  // Kecuali target email & subject
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -44,17 +48,17 @@ const ContactPage = () => {
     });
 
     try {
-      // Ganti dengan email Anda di FormSubmit
-      const formSubmitUrl = 'https://formsubmit.co/sntdashi@gmail.com';
+      // --- PERUBAHAN PENTING ---
+      // Ganti email ini dengan email resmi Litbang/Himatif
+      const formSubmitUrl = 'https://formsubmit.co/litbang.himatif@email.com'; // Diubah
       
-      // Siapkan data form untuk FormSubmit
       const submitData = new FormData();
       submitData.append('name', formData.name);
       submitData.append('email', formData.email);
       submitData.append('message', formData.message);
-      submitData.append('_subject', 'Pesan Baru dari Website Portfolio');
-      submitData.append('_captcha', 'false'); // Nonaktifkan captcha
-      submitData.append('_template', 'table'); // Format email sebagai tabel
+      submitData.append('_subject', 'Pesan Baru dari Web Litbang HIMATIF'); // Diubah
+      submitData.append('_captcha', 'false'); 
+      submitData.append('_template', 'table');
 
       await axios.post(formSubmitUrl, submitData, {
         headers: {
@@ -79,6 +83,7 @@ const ContactPage = () => {
       });
 
     } catch (error) {
+      // Logic error handling: TIDAK DIUBAH (AMAN)
       if (error.request && error.request.status === 0) {
         Swal.fire({
           title: 'Berhasil!',
@@ -107,8 +112,10 @@ const ContactPage = () => {
     }
   };
 
+  // --- Render JSX (Konten sudah diubah) ---
   return (
     <div className="px-[5%] sm:px-[5%] lg:px-[10%] " >
+      {/* --- Perubahan Header --- */}
       <div className="text-center lg:mt-[5%] mt-10 mb-2 sm:px-0 px-[5%]">
         <h2
           data-aos="fade-down"
@@ -125,7 +132,8 @@ const ContactPage = () => {
               WebkitTextFillColor: "transparent",
             }}
           >
-            Hubungi Saya
+            {/* Diubah: Teks Judul */}
+            Kontak Kami
           </span>
         </h2>
         <p
@@ -133,17 +141,22 @@ const ContactPage = () => {
           data-aos-duration="1100"
           className="text-slate-400 max-w-2xl mx-auto text-sm md:text-base mt-2"
         >
-          Punya pertanyaan? Kirimi saya pesan, dan saya akan segera membalasnya.
+          {/* Diubah: Teks Deskripsi */}
+          Punya pertanyaan atau ide? Kirimi kami pesan, dan kami akan segera membalasnya.
         </p>
       </div>
+      {/* --- Akhir Perubahan Header --- */}
+
 
       <div
         className="h-auto py-10 flex items-center justify-center 2xl:pr-[3.1%] lg:pr-[3.8%]  md:px-0"
         id="Contact"
       >
         <div className="container px-[1%] grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-[45%_55%] 2xl:grid-cols-[35%_65%] gap-12" >
+          
+          {/* --- Perubahan Form --- */}
           <div
-        
+            // Style & Animasi: TIDAK DIUBAH (AMAN)
             className="bg-white/5 backdrop-blur-xl rounded-3xl shadow-2xl p-5 py-10 sm:p-10 transform transition-all duration-500 hover:shadow-[#6366f1]/10"
           >
             <div className="flex justify-between items-start mb-8">
@@ -152,7 +165,8 @@ const ContactPage = () => {
                   Hubungi
                 </h2>
                 <p className="text-gray-400">
-                  Ada yang ingin didiskusikan? Kirim saya pesan dan mari kita bicara.
+                  {/* Diubah: Teks Deskripsi */}
+                  Ada yang ingin didiskusikan? Kirim kami pesan dan mari kita bicara.
                 </p>
               </div>
               <Share2 className="w-10 h-10 text-[#6366f1] opacity-50" />
@@ -162,6 +176,7 @@ const ContactPage = () => {
               onSubmit={handleSubmit}
               className="space-y-6"
             >
+              {/* Style & Animasi: TIDAK DIUBAH (AMAN) */}
               <div
                 data-aos="fade-up"
                 data-aos-delay="100"
@@ -225,11 +240,18 @@ const ContactPage = () => {
             </form>
 
             <div className="mt-10 pt-6 border-t border-white/10 flex justify-center space-x-6">
-              <SocialLinks />
+              {/* WAJIB: Buka file SocialLinks.jsx dan ganti link-nya! */}
+              <SocialLinks /> 
             </div>
           </div>
+          {/* --- Akhir Perubahan Form --- */}
 
+          {/* --- Komponen Komentar --- */}
           <div className="  bg-white/5 backdrop-blur-xl rounded-3xl p-3 py-3 md:p-10 md:py-8 shadow-2xl transform transition-all duration-500 hover:shadow-[#6366f1]/10">
+            {/* Supaya bisa di-manage Admin, komponen <Komentar /> ini
+              harus kita 'sulap' biar bisa 'nulis' dan 'baca' dari
+              tabel 'komentar' di Supabase.
+            */}
             <Komentar />
           </div>
         </div>
