@@ -172,7 +172,7 @@ const Home = () => {
 
   // Lottie config: TIDAK DIUBAH (AMAN)
   const lottieOptions = {
-    src: "https://lottie.host/58753882-bb6a-49f5-a2c0-950eda1e135a/NLbpVqGegK.lottie",
+    src: "https://lottie.host/0c37adb3-8d18-4127-855f-645807341484/EGI0d9iGV3.lottie",
     loop: true,
     autoplay: true,
     rendererSettings: {
@@ -180,7 +180,7 @@ const Home = () => {
       progressiveLoad: true,
     },
     style: { width: "100%", height: "100%" },
-    className: `w-full h-full transition-all duration-500 ${
+    className: `w-full h-full transition-all duration-500 lottie-color-fix ${ // <-- TAMBAHIN DI SINI
       isHovering 
         ? "scale-[180%] sm:scale-[160%] md:scale-[150%] lg:scale-[145%] rotate-2" 
         : "scale-[175%] sm:scale-[155%] md:scale-[145%] lg:scale-[140%]"
