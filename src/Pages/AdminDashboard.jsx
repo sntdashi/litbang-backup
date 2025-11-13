@@ -17,22 +17,21 @@ const BackgroundEffect = () => (
   </div>
 );
 
-// --- (2) MODAL COMPONENT (Versi Final Fix: Tengah + Blur + Scroll) ---
+// --- (2) MODAL COMPONENT (Versi Final Fix Pake 'grid') ---
 const Modal = ({ isOpen, onClose, title, children }) => {
   if (!isOpen) return null;
 
   return (
-    // 1. Balikin 'items-center' (biar nengah)
+    // 1. GANTI 'flex items-center justify-center' -> 'grid place-items-center'
+    // 'place-items-center' itu shortcut sakti buat nengahin horizontal + vertikal.
     // 2. Tambah 'backdrop-blur-lg' (biar ngeblur!)
     <div 
-      className="fixed inset-0 bg-black/80 backdrop-blur-lg z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 bg-black/80 backdrop-blur-lg z-50 grid place-items-center p-4"
       onClick={onClose}
     >
       
-      {/* 3.
-        - 'max-h-[90vh]' (Batesin tinggi, misal 90% layar)
-        - 'overflow-y-auto' (Otomatis scroll KALO form-nya kepanjangan)
-        - 'custom-scrollbar' (Biar scroll-nya aesthetic)
+      {/* - 'max-h-[90vh]' (Batesin tinggi)
+        - 'overflow-y-auto' (Biar bisa di-scroll)
       */}
       <div 
         className="relative w-full max-w-2xl bg-[#0d0a1f] border border-white/10 rounded-2xl shadow-xl p-6 max-h-[90vh] overflow-y-auto custom-scrollbar"
@@ -42,7 +41,7 @@ const Modal = ({ isOpen, onClose, title, children }) => {
       >
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors z-20" // Tambah z-20 biar di atas
+          className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors z-20"
         >
           <X className="w-6 h-6" />
         </button>
