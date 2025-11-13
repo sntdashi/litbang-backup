@@ -1,17 +1,17 @@
-import ReactDOM from 'react-dom'; // <-- TAMBAHIN INI DI PALING ATAS
-// ... (sisa import lu)
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../supabaseClient'; // Pastiin path ini bener
 import { useNavigate } from 'react-router-dom';
 import { 
   LogOut, Plus, Trash2, Edit3, Pin, PinOff, Loader2, 
-  ShieldCheck, LayoutDashboard, MessageSquare, Code, FlaskConical, X, AlertTriangle 
+  ShieldCheck, LayoutDashboard, MessageSquare, Code, FlaskConical, X, AlertTriangle,
+  Home, // <-- 1. IMPORT IKON BARU
+  Users // <-- 1. IMPORT IKON BARU
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 
-// --- (1) BACKGROUND EFFECT (UDAH MERAH) ---
+// --- (1) BACKGROUND EFFECT (Aman) ---
 const BackgroundEffect = () => (
   <div className="absolute inset-0 overflow-hidden -z-10">
     <div className="absolute inset-0 bg-gradient-to-r from-[#6A0000]/20 to-[#8B0000]/20 blur-3xl animate-pulse" />
@@ -19,29 +19,19 @@ const BackgroundEffect = () => (
   </div>
 );
 
-// --- (2) MODAL COMPONENT (Versi Final Fix Pake PORTAL) ---
+// --- (2) MODAL COMPONENT (Aman) ---
 const Modal = ({ isOpen, onClose, title, children }) => {
   if (!isOpen) return null;
-
-  // Ini dia magic-nya: "Teleport" modal ini ke document.body
-  // Biar dia ga nempel di dalem <section> yang nge-blur
   return ReactDOM.createPortal( 
-    
-    // 1. 'grid place-items-center' (biar nengah)
-    // 2. 'backdrop-blur-lg' (biar ngeblur!)
     <div 
       className="fixed inset-0 bg-black/80 backdrop-blur-lg z-50 grid place-items-center p-4"
       onClick={onClose}
     >
-      
-      {/* - 'max-h-[90vh]' (Batesin tinggi)
-        - 'overflow-y-auto' (Biar bisa di-scroll)
-      */}
       <div 
         className="relative w-full max-w-2xl bg-[#0d0a1f] border border-white/10 rounded-2xl shadow-xl p-6 max-h-[90vh] overflow-y-auto custom-scrollbar"
         data-aos="fade-up"
         data-aos-duration="300"
-        onClick={(e) => e.stopPropagation()} // Biar ga nutup pas klik form
+        onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={onClose}
@@ -55,13 +45,15 @@ const Modal = ({ isOpen, onClose, title, children }) => {
         {children}
       </div>
     </div>,
-    document.body // <-- INI LOKASI TELEPORT-NYA
+    document.body 
   );
 };
-// --- AKHIR FIX MODAL ---
+// --- AKHIR MODAL ---
 
-// --- (3) MANAGE PROKER COMPONENT (UDAH MERAH) ---
+// --- (3) MANAGE PROKER COMPONENT (Aman) ---
 const ManageProker = () => {
+  // ... (KODE DI SINI SAMA PERSIS, GA GW TULIS ULANG BIAR HEMAT TEMPAT) ...
+  // ... (Fungsi fetchProker, handleOpenModal, handleSubmit, handleDelete...)
   const [prokerList, setProkerList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -231,14 +223,14 @@ const ManageProker = () => {
   );
 };
 
-// --- (4) MANAGE WORKSHOP COMPONENT (UDAH MERAH) ---
+// --- (4) MANAGE WORKSHOP COMPONENT (Aman) ---
 const ManageWorkshop = () => {
+  // ... (KODE DI SINI SAMA PERSIS, GA GW TULIS ULANG BIAR HEMAT TEMPAT) ...
   const [workshopList, setWorkshopList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
   const [formData, setFormData] = useState({ Title: '', Img: '' });
-
   const fetchWorkshop = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase.from('workshop').select('*').order('id', { ascending: false });
@@ -323,11 +315,11 @@ const ManageWorkshop = () => {
   );
 };
 
-// --- (5) MANAGE KOMENTAR COMPONENT (UDAH MERAH) ---
+// --- (5) MANAGE KOMENTAR COMPONENT (Aman) ---
 const ManageKomentar = () => {
+  // ... (KODE DI SINI SAMA PERSIS, GA GW TULIS ULANG BIAR HEMAT TEMPAT) ...
   const [komentarList, setKomentarList] = useState([]);
   const [loading, setLoading] = useState(true);
-
   const fetchKomentar = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase.from('litbang_guestbook').select('*').order('is_pinned', { ascending: false }).order('created_at', { ascending: false });
@@ -395,7 +387,96 @@ const ManageKomentar = () => {
   );
 };
 
-// Helper buat Form Input (UDAH MERAH)
+// --- 6. KOMPONEN BARU: MANAGE ADMIN ---
+const ManageAdmin = () => {
+  const [adminList, setAdminList] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fungsi buat list admin
+  const fetchAdmins = useCallback(async () => {
+    setLoading(true);
+    // Kita ambil data dari tabel 'profiles' yang role-nya 'admin'
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id, full_name, role') // Ambil 'full_name' (kalo ada)
+      .eq('role', 'admin');
+    
+    if (!error) {
+      setAdminList(data);
+    } else {
+      console.error("Error fetching admins:", error);
+      Swal.fire('Gagal!', 'Gagal ngambil list admin.', 'error');
+    }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    fetchAdmins();
+    AOS.refresh();
+  }, [fetchAdmins]);
+
+  // Fungsi buat nampilin popup panduan tambah admin
+  const handleAddAdmin = () => {
+    Swal.fire({
+      title: 'Cara Nambah Admin Baru (Versi Aman)',
+      // Pake 'html' biar bisa pake tag <ol> dan <strong>
+      html: `
+        <div class="text-left text-gray-300 space-y-3">
+          <p>Ngab, nambah admin dari sini bahaya (bisa nge-leak *service key*). Ini cara paling aman:</p>
+          <ol class="list-decimal list-inside space-y-2">
+            <li>Buka <strong>Dashboard Supabase</strong> lu.</li>
+            <li>Masuk ke <strong>Authentication</strong> -> <strong>Users</strong>.</li>
+            <li>Klik <strong>"Add user"</strong> (atau "Invite user") & daftarin email admin baru.</li>
+            <li>Buka <strong>Table Editor</strong> -> tabel <strong>"profiles"</strong>.</li>
+            <li>Cari email baru tadi, ganti kolom <strong>"role"</strong> nya dari "user" jadi <strong>"admin"</strong>.</li>
+            <li>Klik <strong>Save</strong>.</li>
+          </ol>
+          <p>Beres! Suruh admin baru cek email & login.</p>
+        </div>
+      `,
+      icon: 'info',
+      confirmButtonText: 'Ngerti, Ngab!',
+      confirmButtonColor: '#8B0000', // Pake warna merah
+      background: '#0d0a1f', // Background dark
+      color: '#ffffff' // Teks putih
+    });
+  };
+
+  return (
+    <div data-aos="fade-up" data-aos-delay="200">
+      <button
+        onClick={handleAddAdmin}
+        className="mb-6 flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-600 to-red-800 text-white font-semibold rounded-lg shadow-lg hover:scale-105 transition-transform"
+      >
+        <Plus className="w-5 h-5" />
+        Tambah Admin Baru
+      </button>
+
+      <h3 className="text-xl font-semibold text-white mb-4">List Admin Aktif</h3>
+      <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+        {loading && adminList.length === 0 && <Loader2 className="w-6 h-6 animate-spin mx-auto" />}
+        {adminList.map(admin => (
+          <div key={admin.id} className="bg-white/5 border border-white/10 p-4 rounded-lg flex justify-between items-center">
+            <div>
+              <h3 className="font-bold text-white text-lg">
+                {/* Tunjukin 'full_name' kalo ada, kalo ga ada, tunjukin 'id' nya */}
+                {admin.full_name || 'Admin (Nama tidak ada)'}
+              </h3>
+              <p className="text-gray-400 text-sm">ID: {admin.id}</p>
+            </div>
+            <span className="px-3 py-1 bg-red-500/20 text-red-300 text-xs font-medium rounded-full">
+              {admin.role}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+// --- AKHIR KOMPONEN BARU ---
+
+
+// Helper buat Form Input (Aman)
 const InputForm = ({ label, name, value, onChange, placeholder, isTextarea = false }) => (
   <div>
     <label className="block text-sm font-medium text-gray-300 mb-1">{label}</label>
@@ -422,13 +503,13 @@ const InputForm = ({ label, name, value, onChange, placeholder, isTextarea = fal
 );
 
 
-// --- (6) KOMPONEN UTAMA: ADMIN DASHBOARD (UDAH MERAH) ---
+// --- (7) KOMPONEN UTAMA: ADMIN DASHBOARD (UDAH DI-UPGRADE) ---
 const AdminDashboard = () => {
   const [user, setUser] = useState(null);
   const [activeTab, setActiveTab] = useState('proker'); 
   const navigate = useNavigate();
 
-  // Protected route (AMAN)
+  // Protected route (Aman)
   useEffect(() => {
     const checkSessionAndRole = async () => {
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
@@ -461,7 +542,7 @@ const AdminDashboard = () => {
     checkSessionAndRole();
   }, [navigate]);
 
-  // Logout (AMAN)
+  // Logout (Aman)
   const handleLogout = async () => {
     Swal.fire({
       title: 'Mau Logout, ngab?', icon: 'question',
@@ -475,7 +556,7 @@ const AdminDashboard = () => {
     });
   };
 
-  // Loading state (UDAH MERAH)
+  // Loading state (Aman)
   if (!user) {
     return (
       <div className="min-h-screen w-full flex items-center justify-center bg-[#1A0000]">
@@ -484,12 +565,12 @@ const AdminDashboard = () => {
     );
   }
 
-  // Render Halaman Admin (UDAH MERAH)
+  // Render Halaman Admin
   return (
     <div className="relative min-h-screen w-full bg-[#1A0000] text-white p-4 md:p-8">
       <BackgroundEffect />
 
-      {/* Header Admin */}
+      {/* Header Admin (PERUBAHAN DI SINI) */}
       <header 
         className="relative z-10 flex flex-col md:flex-row justify-between items-center mb-8 p-4 bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl"
         data-aos="fade-down"
@@ -501,18 +582,31 @@ const AdminDashboard = () => {
             <p className="text-sm text-gray-400">Login sebagai: {user.email}</p>
           </div>
         </div>
-        <button
-          onClick={handleLogout}
-          className="mt-4 md:mt-0 flex items-center gap-2 px-4 py-2 bg-red-500/20 text-red-400 font-medium rounded-lg hover:bg-red-500/30 transition-colors"
-        >
-          <LogOut className="w-5 h-5" />
-          Logout
-        </button>
+        
+        {/* --- 2. TOMBOL BARU DITAMBAH DI SINI --- */}
+        <div className="flex gap-4 items-center mt-4 md:mt-0">
+          <button
+              onClick={() => navigate('/')} // <-- Tombol Back to Home
+              className="flex items-center gap-2 px-4 py-2 bg-white/10 text-white font-medium rounded-lg hover:bg-white/20 transition-colors"
+          >
+              <Home className="w-5 h-5" />
+              <span>Home</span>
+          </button>
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-2 px-4 py-2 bg-red-500/20 text-red-400 font-medium rounded-lg hover:bg-red-500/30 transition-colors"
+          >
+            <LogOut className="w-5 h-5" />
+            <span>Logout</span>
+          </button>
+        </div>
+        {/* --- AKHIR TOMBOL BARU --- */}
+
       </header>
 
       {/* Konten Admin */}
       <main className="relative z-10 flex flex-col lg:flex-row gap-8">
-        {/* Navigasi / Tabs */}
+        {/* Navigasi / Tabs (PERUBAHAN DI SINI) */}
         <nav 
           className="lg:w-1/4 p-4 bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl self-start"
           data-aos="fade-right"
@@ -537,18 +631,28 @@ const AdminDashboard = () => {
               isActive={activeTab === 'komentar'} 
               onClick={() => setActiveTab('komentar')}
             />
+            {/* --- 3. TAB BARU DITAMBAH DI SINI --- */}
+            <TabButton 
+              icon={Users} 
+              label="Manage Admin" 
+              isActive={activeTab === 'admin'} 
+              onClick={() => setActiveTab('admin')}
+            />
+            {/* --- AKHIR TAB BARU --- */}
           </ul>
         </nav>
 
-        {/* Content Area */}
+        {/* Content Area (PERUBAHAN DI SINI) */}
         <section className="lg:w-3/4 p-6 bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl min-h-[60vh]">
           {activeTab === 'proker' && <ManageProker />}
           {activeTab === 'workshop' && <ManageWorkshop />}
           {activeTab === 'komentar' && <ManageKomentar />}
+          {/* --- 4. KONTEN BARU DITAMBAH DI SINI --- */}
+          {activeTab === 'admin' && <ManageAdmin />}
         </section>
       </main>
 
-      {/* Style buat scrollbar (UDAH MERAH) */}
+      {/* Style buat scrollbar (Aman) */}
       <style jsx>{`
         .custom-scrollbar::-webkit-scrollbar {
             width: 6px;
@@ -569,7 +673,7 @@ const AdminDashboard = () => {
   );
 };
 
-// Helper buat Tombol Tab (UDAH MERAH)
+// Helper buat Tombol Tab (Aman)
 const TabButton = ({ icon: Icon, label, isActive, onClick }) => (
   <li>
     <button
