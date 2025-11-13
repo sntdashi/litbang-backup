@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { supabase } from "../supabaseClient"; // <-- IMPORT BARU
 import {
   ArrowLeft, ExternalLink, Github, Code2, Star,
-  ChevronRight, Layers, Layout, Globe, Package, Cpu, Code,
+  ChevronRight, Layers, Layout, Globe, Package, Cpu, Code, Loader2, // <-- Tambah Loader2
 } from "lucide-react";
 import Swal from 'sweetalert2';
 
+// --- Komponen TechBadge: TIDAK DIUBAH (AMAN) ---
 const TECH_ICONS = {
   React: Globe,
   Tailwind: Layout,
@@ -14,12 +16,12 @@ const TECH_ICONS = {
   Javascript: Code,
   HTML: Code,
   CSS: Code, 
+  Supabase: Package, // <-- Bonus ikon
   default: Package,
 };
 
 const TechBadge = ({ tech }) => {
   const Icon = TECH_ICONS[tech] || TECH_ICONS["default"];
-  
   return (
     <div className="group relative overflow-hidden px-3 py-2 md:px-4 md:py-2.5 bg-gradient-to-r from-blue-600/10 to-purple-600/10 rounded-xl border border-blue-500/10 hover:border-blue-500/30 transition-all duration-300 cursor-default">
       <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 to-purple-500/0 group-hover:from-blue-500/10 group-hover:to-purple-500/10 transition-all duration-500" />
@@ -33,6 +35,7 @@ const TechBadge = ({ tech }) => {
   );
 };
 
+// --- Komponen FeatureItem: TIDAK DIUBAH (AMAN) ---
 const FeatureItem = ({ feature }) => {
   return (
     <li className="group flex items-start space-x-3 p-2.5 md:p-3.5 rounded-xl hover:bg-white/5 transition-all duration-300 border border-transparent hover:border-white/10">
@@ -47,6 +50,8 @@ const FeatureItem = ({ feature }) => {
   );
 };
 
+// --- Komponen ProjectStats: TIDAK DIUBAH (AMAN) ---
+// (Logic-nya udah bener, ngitung panjang array)
 const ProjectStats = ({ project }) => {
   const techStackCount = project?.TechStack?.length || 0;
   const featuresCount = project?.Features?.length || 0;
@@ -54,7 +59,6 @@ const ProjectStats = ({ project }) => {
   return (
     <div className="grid grid-cols-2 gap-3 md:gap-4 p-3 md:p-4 bg-[#0a0a1a] rounded-xl overflow-hidden relative">
       <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 to-purple-900/20 opacity-50 blur-2xl z-0" />
-
       <div className="relative z-10 flex items-center space-x-2 md:space-x-3 bg-white/5 p-2 md:p-3 rounded-lg border border-blue-500/20 transition-all duration-300 hover:scale-105 hover:border-blue-500/50 hover:shadow-lg">
         <div className="bg-blue-500/20 p-1.5 md:p-2 rounded-full">
           <Code2 className="text-blue-300 w-4 h-4 md:w-6 md:h-6" strokeWidth={1.5} />
@@ -64,7 +68,6 @@ const ProjectStats = ({ project }) => {
           <div className="text-[10px] md:text-xs text-gray-400">Total Teknologi</div>
         </div>
       </div>
-
       <div className="relative z-10 flex items-center space-x-2 md:space-x-3 bg-white/5 p-2 md:p-3 rounded-lg border border-purple-500/20 transition-all duration-300 hover:scale-105 hover:border-purple-500/50 hover:shadow-lg">
         <div className="bg-purple-500/20 p-1.5 md:p-2 rounded-full">
           <Layers className="text-purple-300 w-4 h-4 md:w-6 md:h-6" strokeWidth={1.5} />
@@ -78,6 +81,7 @@ const ProjectStats = ({ project }) => {
   );
 };
 
+// --- Komponen handleGithubClick: TIDAK DIUBAH (AMAN) ---
 const handleGithubClick = (githubLink) => {
   if (githubLink === 'Private') {
     Swal.fire({
@@ -94,42 +98,64 @@ const handleGithubClick = (githubLink) => {
   return true;
 };
 
+// --- KOMPONEN UTAMA (LOGIC DIUBAH TOTAL) ---
 const ProjectDetails = () => {
-  const { id } = useParams();
+  const { id } = useParams(); // Ambil ID dari URL (misal: /project/3)
   const navigate = useNavigate();
   const [project, setProject] = useState(null);
+  const [isLoading, setIsLoading] = useState(true); // State loading baru
   const [isImageLoaded, setIsImageLoaded] = useState(false);
 
+  // --- LOGIC FETCH DATA DIGANTI TOTAL ---
   useEffect(() => {
     window.scrollTo(0, 0);
-    const storedProjects = JSON.parse(localStorage.getItem("projects")) || [];
-    const selectedProject = storedProjects.find((p) => String(p.id) === id);
-    
-    if (selectedProject) {
-      const enhancedProject = {
-        ...selectedProject,
-        Features: selectedProject.Features || [],
-        TechStack: selectedProject.TechStack || [],
-        Github: selectedProject.Github || 'https://github.com/sntdashi',
-      };
-      setProject(enhancedProject);
-    }
-  }, [id]);
 
-  if (!project) {
+    const fetchProject = async () => {
+      setIsLoading(true);
+      // Ambil data dari Supabase, BUKAN localStorage
+      const { data, error } = await supabase
+        .from('proker') // Dari tabel 'proker'
+        .select('*')    // Ambil semua kolom
+        .eq('id', id)   // Yang 'id'-nya sama dengan 'id' di URL
+        .single();      // Ambil satu aja
+
+      if (error) {
+        console.error("Error fetch proker detail:", error);
+        Swal.fire('Error', 'Gagal memuat data proker.', 'error');
+        navigate('/'); // Lempar ke home kalo error
+      } else if (data) {
+        // Data berhasil didapat, kita enhance (kasih nilai default)
+        const enhancedProject = {
+          ...data,
+          Features: data.Features || [], // Kasih array kosong kalo null
+          TechStack: data.TechStack || [], // Kasih array kosong kalo null
+          Github: data.Github || 'Private', // Default 'Private' kalo null
+        };
+        setProject(enhancedProject);
+      }
+      setIsLoading(false);
+    };
+
+    fetchProject();
+  }, [id, navigate]); // Jalankan tiap 'id' berubah
+
+  // --- Tampilan Loading Baru ---
+  if (isLoading || !project) {
     return (
       <div className="min-h-screen bg-[#030014] flex items-center justify-center">
         <div className="text-center space-y-6 animate-fadeIn">
-          <div className="w-16 h-16 md:w-24 md:h-24 mx-auto border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
-          <h2 className="text-xl md:text-3xl font-bold text-white">Loading Project...</h2>
+          {/* Ganti pake icon Loader2 biar konsisten */}
+          <Loader2 className="w-16 h-16 md:w-24 md:h-24 mx-auto text-indigo-500 animate-spin" />
+          <h2 className="text-xl md:text-3xl font-bold text-white">Memuat Program Kerja...</h2>
         </div>
       </div>
     );
   }
 
+  // --- RENDER HALAMAN (Teks Diubah) ---
   return (
     <div className="min-h-screen bg-[#030014] px-[2%] sm:px-0 relative overflow-hidden">
-      {/* Background animations remain unchanged */}
+      {/* Background animations: TIDAK DIUBAH (AMAN) */}
       <div className="fixed inset-0">
         <div className="absolute -inset-[10px] opacity-20">
           <div className="absolute top-0 -left-4 w-72 md:w-96 h-72 md:h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob" />
@@ -141,23 +167,28 @@ const ProjectDetails = () => {
 
       <div className="relative">
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-16">
+          
+          {/* Breadcrumbs (Teks Diubah) */}
           <div className="flex items-center space-x-2 md:space-x-4 mb-8 md:mb-12 animate-fadeIn">
             <button
-              onClick={() => navigate(-1)}
+              onClick={() => navigate(-1)} // Tombol Back (Aman)
               className="group inline-flex items-center space-x-1.5 md:space-x-2 px-3 md:px-5 py-2 md:py-2.5 bg-white/5 backdrop-blur-xl rounded-xl text-white/90 hover:bg-white/10 transition-all duration-300 border border-white/10 hover:border-white/20 text-sm md:text-base"
             >
               <ArrowLeft className="w-4 h-4 md:w-5 md:h-5 group-hover:-translate-x-1 transition-transform" />
-              <span>Back</span>
+              <span>Kembali</span>
             </button>
             <div className="flex items-center space-x-1 md:space-x-2 text-sm md:text-base text-white/50">
-              <span>Projects</span>
+              <span>Program Kerja</span> {/* Diubah: Projects -> Program Kerja */}
               <ChevronRight className="w-3 h-3 md:w-4 md:h-4" />
               <span className="text-white/90 truncate">{project.Title}</span>
             </div>
           </div>
 
+          {/* Konten Utama */}
           <div className="grid lg:grid-cols-2 gap-8 md:gap-16">
             <div className="space-y-6 md:space-y-10 animate-slideInLeft">
+              
+              {/* Judul & Deskripsi (Aman) */}
               <div className="space-y-4 md:space-y-6">
                 <h1 className="text-3xl md:text-6xl font-bold bg-gradient-to-r from-blue-200 via-purple-200 to-pink-200 bg-clip-text text-transparent leading-tight">
                   {project.Title}
@@ -167,17 +198,17 @@ const ProjectDetails = () => {
                   <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full blur-sm" />
                 </div>
               </div>
-
               <div className="prose prose-invert max-w-none">
                 <p className="text-base md:text-lg text-gray-300/90 leading-relaxed">
                   {project.Description}
                 </p>
               </div>
 
+              {/* Stats (Aman) */}
               <ProjectStats project={project} />
 
+              {/* Tombol Aksi (Aman) */}
               <div className="flex flex-wrap gap-3 md:gap-4">
-                {/* Action buttons */}
                 <a
                   href={project.Link}
                   target="_blank"
@@ -188,7 +219,6 @@ const ProjectDetails = () => {
                   <ExternalLink className="relative w-4 h-4 md:w-5 md:h-5 group-hover:rotate-12 transition-transform" />
                   <span className="relative font-medium">Live Demo</span>
                 </a>
-
                 <a
                   href={project.Github}
                   target="_blank"
@@ -202,10 +232,11 @@ const ProjectDetails = () => {
                 </a>
               </div>
 
+              {/* Tech Stack (Aman) */}
               <div className="space-y-4 md:space-y-6">
                 <h3 className="text-lg md:text-xl font-semibold text-white/90 mt-[3rem] md:mt-0 flex items-center gap-2 md:gap-3">
                   <Code2 className="w-4 h-4 md:w-5 md:h-5 text-blue-400" />
-                  Technologies Used
+                  Teknologi yang Digunakan
                 </h3>
                 {project.TechStack.length > 0 ? (
                   <div className="flex flex-wrap gap-2 md:gap-3">
@@ -214,14 +245,14 @@ const ProjectDetails = () => {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm md:text-base text-gray-400 opacity-50">No technologies added.</p>
+                  <p className="text-sm md:text-base text-gray-400 opacity-50">Belum ada teknologi ditambahkan.</p>
                 )}
               </div>
             </div>
 
+            {/* Gambar & Fitur (Aman) */}
             <div className="space-y-6 md:space-y-10 animate-slideInRight">
               <div className="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl group">
-              
                 <div className="absolute inset-0 bg-gradient-to-t from-[#030014] via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <img
                   src={project.Img}
@@ -232,11 +263,10 @@ const ProjectDetails = () => {
                 <div className="absolute inset-0 border-2 border-white/0 group-hover:border-white/10 transition-colors duration-300 rounded-2xl" />
               </div>
 
-              {/* Fitur Utama */}
               <div className="bg-white/[0.02] backdrop-blur-xl rounded-2xl p-8 border border-white/10 space-y-6 hover:border-white/20 transition-colors duration-300 group">
                 <h3 className="text-xl font-semibold text-white/90 flex items-center gap-3">
                   <Star className="w-5 h-5 text-yellow-400 group-hover:rotate-[20deg] transition-transform duration-300" />
-                  Key Features
+                  Fitur Utama
                 </h3>
                 {project.Features.length > 0 ? (
                   <ul className="list-none space-y-2">
@@ -245,7 +275,7 @@ const ProjectDetails = () => {
                     ))}
                   </ul>
                 ) : (
-                  <p className="text-gray-400 opacity-50">No features added.</p>
+                  <p className="text-gray-400 opacity-50">Belum ada fitur ditambahkan.</p>
                 )}
               </div>
             </div>
@@ -253,6 +283,7 @@ const ProjectDetails = () => {
         </div>
       </div>
 
+      {/* Style: TIDAK DIUBAH (AMAN) */}
       <style jsx>{`
         @keyframes blob {
           0% {

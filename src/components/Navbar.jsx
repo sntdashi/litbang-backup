@@ -6,22 +6,27 @@ const Navbar = () => {
     const [scrolled, setScrolled] = useState(false);
     const [activeSection, setActiveSection] = useState("Home");
     
+    // --- PERUBAHAN DI SINI ---
     const navItems = [
         { href: "#Home", label: "Home" },
-        { href: "#About", label: "About" },
-        { href: "#Portofolio", label: "Portofolio" },
-        { href: "#Contact", label: "Contact" },
+        { href: "#About", label: "Tentang" }, // Diubah
+        { href: "#proker", label: "Program Kerja" }, // Diubah (href & label)
+        { href: "#Contact", label: "Kontak" }, // Diubah
     ];
+    // --- AKHIR PERUBAHAN ---
 
     useEffect(() => {
         const handleScroll = () => {
             setScrolled(window.scrollY > 20);
+            
+            // Logic ini udah bener, dia bakal nyari ID section
+            // (Makanya href di atas kita ganti jadi #proker)
             const sections = navItems.map(item => {
                 const section = document.querySelector(item.href);
                 if (section) {
                     return {
                         id: item.href.replace("#", ""),
-                        offset: section.offsetTop - 550,
+                        offset: section.offsetTop - 550, // Offset lu agak jauh, tapi gw biarin
                         height: section.offsetHeight
                     };
                 }
@@ -29,6 +34,13 @@ const Navbar = () => {
             }).filter(Boolean);
 
             const currentPosition = window.scrollY;
+            
+            // Perbaikan kecil: Kalo scroll di paling atas, aktifkan Home
+            if (currentPosition < 400) { // Angka 400 bisa disesuaiin
+                 setActiveSection("Home");
+                 return;
+            }
+            
             const active = sections.find(section => 
                 currentPosition >= section.offset && 
                 currentPosition < section.offset + section.height
@@ -42,8 +54,9 @@ const Navbar = () => {
         window.addEventListener("scroll", handleScroll);
         handleScroll();
         return () => window.removeEventListener("scroll", handleScroll);
-    }, []);
+    }, [navItems]); // Tambahin navItems di dependency array
 
+    // Logic Buka/Tutup Menu: TIDAK DIUBAH (AMAN)
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = 'hidden';
@@ -52,11 +65,12 @@ const Navbar = () => {
         }
     }, [isOpen]);
 
+    // Logic Scroll Smooth: TIDAK DIUBAH (AMAN)
     const scrollToSection = (e, href) => {
         e.preventDefault();
         const section = document.querySelector(href);
         if (section) {
-            const top = section.offsetTop - 100;
+            const top = section.offsetTop - 100; // Offset scroll
             window.scrollTo({
                 top: top,
                 behavior: "smooth"
@@ -67,6 +81,7 @@ const Navbar = () => {
 
     return (
         <nav
+            // Style Navbar: TIDAK DIUBAH (AMAN)
             className={`fixed w-full top-0 z-50 transition-all duration-500 ${
                 isOpen
                     ? "bg-[#030014]"
@@ -77,18 +92,21 @@ const Navbar = () => {
         >
             <div className="mx-auto px-[5%] sm:px-[5%] lg:px-[10%]">
                 <div className="flex items-center justify-between h-16">
-                    {/* Logo */}
+                    
+                    {/* --- PERUBAHAN LOGO --- */}
                     <div className="flex-shrink-0">
                         <a
                             href="#Home"
                             onClick={(e) => scrollToSection(e, "#Home")}
                             className="text-xl font-bold bg-gradient-to-r from-[#a855f7] to-[#6366f1] bg-clip-text text-transparent"
                         >
-                            rawrzn
+                            Litbang {/* Diubah dari 'rawrzn' */}
                         </a>
                     </div>
+                    {/* --- AKHIR PERUBAHAN LOGO --- */}
         
                     {/* Desktop Navigation */}
+                    {/* Logic & Style: TIDAK DIUBAH (AMAN), otomatis pake navItems baru */}
                     <div className="hidden md:block">
                         <div className="ml-8 flex items-center space-x-8">
                             {navItems.map((item) => (
@@ -119,7 +137,7 @@ const Navbar = () => {
                         </div>
                     </div>
         
-                    {/* Mobile Menu Button */}
+                    {/* Mobile Menu Button: TIDAK DIUBAH (AMAN) */}
                     <div className="md:hidden">
                         <button
                             onClick={() => setIsOpen(!isOpen)}
@@ -138,6 +156,7 @@ const Navbar = () => {
             </div>
         
             {/* Mobile Menu */}
+            {/* Logic & Style: TIDAK DIUBAH (AMAN), otomatis pake navItems baru */}
             <div
                 className={`md:hidden transition-all duration-300 ease-in-out ${
                     isOpen

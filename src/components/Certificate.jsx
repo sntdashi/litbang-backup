@@ -13,7 +13,8 @@ const Certificate = ({ ImgSertif }) => {
 	const handleClose = () => {
 		setOpen(false)
 	}
-
+ 
+  // --- SEMUA LOGIC & STYLE DI SINI 100% AMAN (TIDAK DIUBAH) ---
 	return (
 		<Box component="div" sx={{ width: "100%" }}>
 			{/* Thumbnail Container */}
@@ -113,13 +114,15 @@ const Certificate = ({ ImgSertif }) => {
 								fontWeight: 600,
 								textShadow: "0 2px 4px rgba(0,0,0,0.3)",
 							}}>
-							View Certificate
+              {/* --- PERUBAHAN DI SINI --- */}
+							Lihat Gambar {/* Diubah dari "View Certificate" */}
+              {/* --- AKHIR PERUBAHAN --- */}
 						</Typography>
 					</Box>
 				</Box>
 			</Box>
 
-			{/* Modal */}
+			{/* Modal (Logic 100% Aman, tidak diubah) */}
 			<Modal
 				open={open}
 				onClose={handleClose}
