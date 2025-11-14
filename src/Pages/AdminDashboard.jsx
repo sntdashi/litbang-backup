@@ -1,11 +1,13 @@
+// --- INI DIA FIX-NYA ---
+import ReactDOM from 'react-dom'; // <-- JURUS TELEPORT-NYA
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../supabaseClient'; // Pastiin path ini bener
 import { useNavigate } from 'react-router-dom';
 import { 
   LogOut, Plus, Trash2, Edit3, Pin, PinOff, Loader2, 
   ShieldCheck, LayoutDashboard, MessageSquare, Code, FlaskConical, X, AlertTriangle,
-  Home, // <-- 1. IMPORT IKON BARU
-  Users // <-- 1. IMPORT IKON BARU
+  Home, 
+  Users 
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import AOS from 'aos';
@@ -19,7 +21,7 @@ const BackgroundEffect = () => (
   </div>
 );
 
-// --- (2) MODAL COMPONENT (Aman) ---
+// --- (2) MODAL COMPONENT (Aman, sekarang ReactDOM udah di-import) ---
 const Modal = ({ isOpen, onClose, title, children }) => {
   if (!isOpen) return null;
   return ReactDOM.createPortal( 
@@ -52,8 +54,6 @@ const Modal = ({ isOpen, onClose, title, children }) => {
 
 // --- (3) MANAGE PROKER COMPONENT (Aman) ---
 const ManageProker = () => {
-  // ... (KODE DI SINI SAMA PERSIS, GA GW TULIS ULANG BIAR HEMAT TEMPAT) ...
-  // ... (Fungsi fetchProker, handleOpenModal, handleSubmit, handleDelete...)
   const [prokerList, setProkerList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -225,7 +225,6 @@ const ManageProker = () => {
 
 // --- (4) MANAGE WORKSHOP COMPONENT (Aman) ---
 const ManageWorkshop = () => {
-  // ... (KODE DI SINI SAMA PERSIS, GA GW TULIS ULANG BIAR HEMAT TEMPAT) ...
   const [workshopList, setWorkshopList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -317,7 +316,6 @@ const ManageWorkshop = () => {
 
 // --- (5) MANAGE KOMENTAR COMPONENT (Aman) ---
 const ManageKomentar = () => {
-  // ... (KODE DI SINI SAMA PERSIS, GA GW TULIS ULANG BIAR HEMAT TEMPAT) ...
   const [komentarList, setKomentarList] = useState([]);
   const [loading, setLoading] = useState(true);
   const fetchKomentar = useCallback(async () => {
@@ -387,18 +385,16 @@ const ManageKomentar = () => {
   );
 };
 
-// --- 6. KOMPONEN BARU: MANAGE ADMIN ---
+// --- 6. KOMPONEN BARU: MANAGE ADMIN (Aman) ---
 const ManageAdmin = () => {
   const [adminList, setAdminList] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Fungsi buat list admin
   const fetchAdmins = useCallback(async () => {
     setLoading(true);
-    // Kita ambil data dari tabel 'profiles' yang role-nya 'admin'
     const { data, error } = await supabase
       .from('profiles')
-      .select('id, full_name, role') // Ambil 'full_name' (kalo ada)
+      .select('id, full_name, role') 
       .eq('role', 'admin');
     
     if (!error) {
@@ -415,11 +411,9 @@ const ManageAdmin = () => {
     AOS.refresh();
   }, [fetchAdmins]);
 
-  // Fungsi buat nampilin popup panduan tambah admin
   const handleAddAdmin = () => {
     Swal.fire({
       title: 'Cara Nambah Admin Baru (Versi Aman)',
-      // Pake 'html' biar bisa pake tag <ol> dan <strong>
       html: `
         <div class="text-left text-gray-300 space-y-3">
           <p>Ngab, nambah admin dari sini bahaya (bisa nge-leak *service key*). Ini cara paling aman:</p>
@@ -436,9 +430,9 @@ const ManageAdmin = () => {
       `,
       icon: 'info',
       confirmButtonText: 'Ngerti, Ngab!',
-      confirmButtonColor: '#8B0000', // Pake warna merah
-      background: '#0d0a1f', // Background dark
-      color: '#ffffff' // Teks putih
+      confirmButtonColor: '#8B0000', 
+      background: '#0d0a1f',
+      color: '#ffffff' 
     });
   };
 
@@ -459,7 +453,6 @@ const ManageAdmin = () => {
           <div key={admin.id} className="bg-white/5 border border-white/10 p-4 rounded-lg flex justify-between items-center">
             <div>
               <h3 className="font-bold text-white text-lg">
-                {/* Tunjukin 'full_name' kalo ada, kalo ga ada, tunjukin 'id' nya */}
                 {admin.full_name || 'Admin (Nama tidak ada)'}
               </h3>
               <p className="text-gray-400 text-sm">ID: {admin.id}</p>
@@ -503,7 +496,7 @@ const InputForm = ({ label, name, value, onChange, placeholder, isTextarea = fal
 );
 
 
-// --- (7) KOMPONEN UTAMA: ADMIN DASHBOARD (UDAH DI-UPGRADE) ---
+// --- (7) KOMPONEN UTAMA: ADMIN DASHBOARD (Aman) ---
 const AdminDashboard = () => {
   const [user, setUser] = useState(null);
   const [activeTab, setActiveTab] = useState('proker'); 
@@ -570,7 +563,7 @@ const AdminDashboard = () => {
     <div className="relative min-h-screen w-full bg-[#1A0000] text-white p-4 md:p-8">
       <BackgroundEffect />
 
-      {/* Header Admin (PERUBAHAN DI SINI) */}
+      {/* Header Admin (Aman) */}
       <header 
         className="relative z-10 flex flex-col md:flex-row justify-between items-center mb-8 p-4 bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl"
         data-aos="fade-down"
@@ -583,10 +576,9 @@ const AdminDashboard = () => {
           </div>
         </div>
         
-        {/* --- 2. TOMBOL BARU DITAMBAH DI SINI --- */}
         <div className="flex gap-4 items-center mt-4 md:mt-0">
           <button
-              onClick={() => navigate('/')} // <-- Tombol Back to Home
+              onClick={() => navigate('/')}
               className="flex items-center gap-2 px-4 py-2 bg-white/10 text-white font-medium rounded-lg hover:bg-white/20 transition-colors"
           >
               <Home className="w-5 h-5" />
@@ -600,13 +592,11 @@ const AdminDashboard = () => {
             <span>Logout</span>
           </button>
         </div>
-        {/* --- AKHIR TOMBOL BARU --- */}
 
       </header>
 
-      {/* Konten Admin */}
+      {/* Konten Admin (Aman) */}
       <main className="relative z-10 flex flex-col lg:flex-row gap-8">
-        {/* Navigasi / Tabs (PERUBAHAN DI SINI) */}
         <nav 
           className="lg:w-1/4 p-4 bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl self-start"
           data-aos="fade-right"
@@ -631,23 +621,19 @@ const AdminDashboard = () => {
               isActive={activeTab === 'komentar'} 
               onClick={() => setActiveTab('komentar')}
             />
-            {/* --- 3. TAB BARU DITAMBAH DI SINI --- */}
             <TabButton 
               icon={Users} 
               label="Manage Admin" 
               isActive={activeTab === 'admin'} 
               onClick={() => setActiveTab('admin')}
             />
-            {/* --- AKHIR TAB BARU --- */}
           </ul>
         </nav>
 
-        {/* Content Area (PERUBAHAN DI SINI) */}
         <section className="lg:w-3/4 p-6 bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl min-h-[60vh]">
           {activeTab === 'proker' && <ManageProker />}
           {activeTab === 'workshop' && <ManageWorkshop />}
           {activeTab === 'komentar' && <ManageKomentar />}
-          {/* --- 4. KONTEN BARU DITAMBAH DI SINI --- */}
           {activeTab === 'admin' && <ManageAdmin />}
         </section>
       </main>
