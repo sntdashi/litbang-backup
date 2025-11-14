@@ -1,3 +1,5 @@
+// File: src/App.jsx (Versi FIX FINAL)
+
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import React, { useState } from 'react';
 import "./index.css";
@@ -7,20 +9,23 @@ import Home from "./Pages/Home";
 import About from "./Pages/About";
 import AnimatedBackground from "./components/Background";
 import Navbar from "./components/Navbar";
-import Portofolio from "./Pages/Portofolio"; // Ini udah jadi 'Proker'
+import Portofolio from "./Pages/Portofolio"; // Ini halaman 'proker'
 import ContactPage from "./Pages/Contact";
 import ProjectDetails from "./components/ProjectDetail";
 import WelcomeScreen from "./Pages/WelcomeScreen";
-import NotFoundPage from "./Pages/404"; // Halaman 404
+import NotFoundPage from "./Pages/404"; 
 
-// --- Halaman Admin (BARU) ---
+// --- 1. IMPORT HALAMAN BARU ---
+import Struktur from "./Pages/Struktur";
+
+
+// --- Halaman Admin (Aman) ---
 import LoginPage from "./Pages/Login";
 import AdminDashboard from "./Pages/AdminDashboard";
 
 import { AnimatePresence } from 'framer-motion';
 
 // --- (1) Layout Halaman Utama / Landing Page ---
-// (Logic WelcomeScreen lu udah bagus, kita pertahanin)
 const LandingPage = ({ showWelcome, setShowWelcome }) => {
   return (
     <>
@@ -36,20 +41,22 @@ const LandingPage = ({ showWelcome, setShowWelcome }) => {
           <AnimatedBackground />
           <Home />
           <About />
-          <Portofolio />
+          <Portofolio /> 
+          {/* --- 2. TAMBAHIN 'RUANGAN' BARU DI SINI --- */}
+          <Struktur />
+          
+          {/* ------------------------------------- */}
           <ContactPage />
           <footer>
             <center>
               <hr className="my-3 border-gray-400 opacity-15 sm:mx-auto lg:my-6 text-center" />
-              {/* --- PERUBAHAN FOOTER --- */}
               <span className="block text-sm pb-4 text-gray-500 text-center dark:text-gray-400">
                 © 2025{" "} 
-                <a href="https://himatif.id" className="hover:underline"> {/* Ganti ke link Himatif */}
+                <a href="https://himatif.id" className="hover:underline"> 
                   Litbang HIMATIF
                 </a>
                 . All Rights Reserved.
               </span>
-              {/* --- AKHIR PERUBAHAN FOOTER --- */}
             </center>
           </footer>
         </>
@@ -58,47 +65,36 @@ const LandingPage = ({ showWelcome, setShowWelcome }) => {
   );
 };
 
-// --- (2) Layout Halaman Detail Project ---
-// (Kita ganti footernya juga biar konsisten)
+// --- (2) Layout Halaman Detail Project (Aman) ---
 const ProjectPageLayout = () => (
   <>
     <ProjectDetails />
     <footer>
       <center>
         <hr className="my-3 border-gray-400 opacity-15 sm:mx-auto lg:my-6 text-center" />
-        {/* --- PERUBAHAN FOOTER --- */}
         <span className="block text-sm pb-4 text-gray-500 text-center dark:text-gray-400">
-          © 2025{" "} {/* Samain tahunnya */}
+          © 2025{" "} 
           <a href="https://himatif.id" className="hover:underline">
             Litbang HIMATIF
           </a>
           . All Rights Reserved.
         </span>
-        {/* --- AKHIR PERUBAHAN FOOTER --- */}
       </center>
     </footer>
   </>
 );
 
-// --- (3) KOMPONEN UTAMA APP (ROUTER) ---
+// --- (3) KOMPONEN UTAMA APP (ROUTER) (Aman) ---
 function App() {
   const [showWelcome, setShowWelcome] = useState(true);
 
   return (
     <BrowserRouter> 
       <Routes>
-        {/* === RUTE HALAMAN PUBLIK === */}
         <Route path="/" element={<LandingPage showWelcome={showWelcome} setShowWelcome={setShowWelcome} />} />
         <Route path="/project/:id" element={<ProjectPageLayout />} />
-         
-        {/* === RUTE ADMIN (BARU) === */}
-        {/* Halaman Login */}
         <Route path="/login" element={<LoginPage />} />
-        
-        {/* Halaman Dashboard (Protected) */}
         <Route path="/admin" element={<AdminDashboard />} />
-
-        {/* === RUTE 404 (NOT FOUND) === */}
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
