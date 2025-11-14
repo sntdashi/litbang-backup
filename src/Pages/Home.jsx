@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, memo } from "react"
 // Perubahan: Ganti Linkedin dengan Mail di import (kalo belom)
 import { Github, Mail, ExternalLink, Instagram, Sparkles } from "lucide-react"
+import TikTokIcon from '../components/icons/TikTokIcon';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react'
 import AOS from 'aos'
 import 'aos/dist/aos.css'
@@ -108,7 +109,7 @@ const TECH_STACK = ["Web Dev", "Mobile Dev", "Riset AI", "UI/UX"];
 
 // Diubah: Social links (ganti pake placeholder himatif)
 const SOCIAL_LINKS = [
-  { icon: Github, link: "https://github.com/himatif-placeholder" }, // Ganti link ini
+  { icon: TikTokIcon, link: "https://tiktok.com/himatif-placeholder" }, // Ganti link ini
   { icon: Instagram, link: "https://www.instagram.com/himatif_placeholder" }, // Ganti link ini
   { icon: Mail, link: "mailto:litbang@himatif.id" } // Ganti email ini
 ];
