@@ -194,7 +194,7 @@ const ManageProker = () => {
           <InputForm label="Judul Proker" name="Title" value={formData.Title} onChange={handleChange} />
           <InputForm label="Deskripsi" name="Description" value={formData.Description} onChange={handleChange} isTextarea={true} />
           <InputForm label="Image URL" name="Img" value={formData.Img} onChange={handleChange} placeholder="https://... (link ke gambar)" />
-          <InputForm label="Link Proyek (GitHub/Demo)" name="Link" value={formData.Link} onChange={handleChange} placeholder="https://github.com/..." />
+          <InputForm label="Link Proyek (Instagram/Demo)" name="Link" value={formData.Link} onChange={handleChange} placeholder="https://instagram.com/..." />
           <InputForm 
             label="Tech Stack (Pisahkan dengan koma)" 
             name="TechStack" 
