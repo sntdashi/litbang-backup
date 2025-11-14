@@ -1,4 +1,4 @@
-// File: src/pages/About.jsx (Versi FIX FINAL)
+// File: src/pages/About.jsx (Versi FIX FINAL LENGKAP)
 
 import React, { useEffect, memo, useMemo, useState } from "react"
 import { FileText, Code, Sparkles, ArrowUpRight, FlaskConical, Users, Brain } from "lucide-react"
@@ -6,12 +6,12 @@ import AOS from 'aos'
 import 'aos/dist/aos.css'
 import { supabase } from "../supabaseClient" 
 
-// --- Header Component (Aman) ---
+// --- Header Component (INI KODE LENGKAPNYA) ---
 const Header = memo(() => (
   <div className="text-center lg:mb-8 mb-2 px-[5%]">
     <div className="inline-block relative group">
       <h2 
-        className="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#8B0000] to-[#FF4444]" 
+        className="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#8B0000] to-[#FF4444]"
         data-aos="zoom-in-up"
         data-aos-duration="600"
       >
@@ -30,7 +30,7 @@ const Header = memo(() => (
   </div>
 ));
 
-// --- ProfileImage Component (Aman) ---
+// --- ProfileImage Component (INI KODE LENGKAPNYA) ---
 const ProfileImage = memo(() => (
   <div className="flex justify-end items-center sm:p-12 sm:py-0 sm:pb-0 p-0 py-2 pb-2">
     <div 
@@ -69,7 +69,7 @@ const ProfileImage = memo(() => (
   </div>
 ));
 
-// --- StatCard Component (Aman) ---
+// --- StatCard Component (INI KODE LENGKAPNYA) ---
 const StatCard = memo(({ icon: Icon, color, value, label, description, animation }) => (
   <div data-aos={animation} data-aos-duration={1300} className="relative group">
     <div className="relative z-10 bg-gray-900/50 backdrop-blur-lg rounded-2xl p-6 border border-white/10 overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-2xl h-full flex flex-col justify-between">
@@ -114,8 +114,10 @@ const StatCard = memo(({ icon: Icon, color, value, label, description, animation
   </div>
 ));
 
-// --- AboutPage Component (Perubahan di statsData) ---
-const AboutPage = () => {
+
+// --- AboutPage Component ---
+// --- Perubahan: Terima props 'setActiveTab' ---
+const AboutPage = ({ setActiveTab }) => { 
   const [prokerCount, setProkerCount] = useState(0);
   const [workshopCount, setWorkshopCount] = useState(0);
   const [anggotaCount, setAnggotaCount] = useState(0);
@@ -151,7 +153,7 @@ const AboutPage = () => {
     return () => { window.removeEventListener('resize', handleResize); clearTimeout(resizeTimer); };
   }, []);
 
-  // --- PERUBAHAN DI SINI: Tambah 'href' di tiap data ---
+  // --- Perubahan: Tambah 'href' & 'tabIndex' di tiap data ---
   const statsData = useMemo(() => [
     {
       icon: Code,
@@ -160,7 +162,8 @@ const AboutPage = () => {
       label: "Total Program Kerja",
       description: "Solusi inovatif untuk Himpunan",
       animation: "fade-right",
-      href: "#proker" // <-- Link ke proker
+      href: "#proker",
+      tabIndex: 0 // <-- Tab ke-0 (Proker)
     },
     {
       icon: FlaskConical,
@@ -169,7 +172,8 @@ const AboutPage = () => {
       label: "Riset & Workshop",
       description: "Mengembangkan wawasan & skill",
       animation: "fade-up",
-      href: "#proker" // <-- Link ke proker juga (karena ada di tab)
+      href: "#proker",
+      tabIndex: 1 // <-- Tab ke-1 (Workshop)
     },
     {
       icon: Users,
@@ -178,10 +182,31 @@ const AboutPage = () => {
       label: "Total Anggota Aktif",
       description: "Tim solid penuh talenta",
       animation: "fade-left",
-      href: "#anggota" // <-- Link ke anggota
+      href: "#proker", // <-- Link tetep ke #proker
+      tabIndex: 2 // <-- Tab ke-2 (Anggota)
     },
   ], [prokerCount, workshopCount, anggotaCount]);
-  // --- AKHIR PERUBAHAN ---
+  // --- Akhir Perubahan ---
+
+  // --- Fungsi Baru: Buat handle klik StatCard ---
+  const handleStatCardClick = (e, stat) => {
+    e.preventDefault(); // Stop link <a> biasa
+    
+    // 1. Ganti Tab Aktif
+    setActiveTab(stat.tabIndex);
+
+    // 2. Scroll ke #proker
+    const section = document.querySelector(stat.href);
+    if (section) {
+        const top = section.offsetTop - 100; // Offset (biar ga mentok)
+        window.scrollTo({
+            top: top,
+            behavior: "smooth"
+        });
+    }
+  };
+  // --- Akhir Fungsi Baru ---
+
 
   return (
     <div
@@ -193,7 +218,7 @@ const AboutPage = () => {
       <div className="w-full mx-auto pt-8 sm:pt-12 relative">
         <div className="flex flex-col-reverse lg:grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
           <div className="space-y-6 text-center lg:text-left">
-            {/* --- Teks Judul (Aman) --- */}
+            {/* Judul, Paragraf, Quote - Aman */}
             <h2 
               className="text-3xl sm:text-4xl lg:text-5xl font-bold"
               data-aos="fade-right"
@@ -211,7 +236,6 @@ const AboutPage = () => {
               </span>
             </h2>
             
-            {/* --- Teks Paragraf (Aman) --- */}
             <p 
               className="text-base sm:text-lg lg:text-xl text-gray-400 leading-relaxed text-justify pb-4 sm:pb-0"
               data-aos="fade-right"
@@ -220,7 +244,6 @@ const AboutPage = () => {
              Departemen Penelitian dan Pengembangan (Litbang) adalah jantung inovasi di HIMATIF. Kami berfokus pada riset teknologi, pengembangan proyek internal, dan menyelenggarakan workshop untuk meningkatkan skill anggota. Misi kami adalah menciptakan ekosistem teknologi yang kreatif dan solutif.
             </p>
 
-            {/* --- Quote Section (Aman) --- */}
             <div 
               className="relative bg-gradient-to-br from-[#8B0000]/5 via-transparent to-[#FF4444]/5 border border-gradient-to-r border-[#8B0000]/30 rounded-2xl p-4 my-6 backdrop-blur-md shadow-2xl overflow-hidden"
               data-aos="fade-up"
@@ -239,9 +262,8 @@ const AboutPage = () => {
               </blockquote>
             </div>
 
-            {/* --- PERUBAHAN DI SINI: Tombol/CTA (href diubah ke lowercase) --- */}
+            {/* Tombol CTA (href #struktur udah bener) */}
             <div className="flex flex-col lg:flex-row items-center lg:items-start gap-4 lg:gap-4 lg:px-0 w-full">
-              {/* Diubah: href="#Struktur" -> href="#struktur" */}
               <a href="#struktur" className="w-full lg:w-auto"> 
                 <button 
                   data-aos="fade-up"
@@ -251,7 +273,6 @@ const AboutPage = () => {
                   <FileText className="w-4 h-4 sm:w-5 sm:h-5" /> Struktur Organisasi
                 </button>
               </a>
-              {/* href="#proker" (Aman) */}
               <a href="#proker" className="w-full lg:w-auto"> 
                 <button 
                   data-aos="fade-up"
@@ -267,19 +288,18 @@ const AboutPage = () => {
           <ProfileImage />
         </div>
 
-        {/* --- PERUBAHAN DI SINI: Hapus <a> wrapper, pindah ke dalem map --- */}
+        {/* --- PERUBAHAN DI SINI: Ganti <a> jadi <button> onClick --- */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16 cursor-pointer">
           {statsData.map((stat) => (
-            // Pindahin <a> wrapper-nya ke sini, pake href dari data
-            <a key={stat.label} href={stat.href}>
+            // Ganti <a> jadi <div onClick... > biar bisa nge-set tab
+            <div key={stat.label} onClick={(e) => handleStatCardClick(e, stat)}>
               <StatCard {...stat} />
-            </a>
+            </div>
           ))}
         </div>
         {/* --- AKHIR PERUBAHAN --- */}
       </div>
 
-      {/* Style (Aman) */}
       <style jsx>{`
         @keyframes float {
           0%, 100% { transform: translateY(0); }
