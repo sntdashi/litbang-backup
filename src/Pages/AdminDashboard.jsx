@@ -56,12 +56,12 @@ const Modal = ({ isOpen, onClose, title, children }) => {
 
 // --- (3) MANAGE PROKER COMPONENT (Aman) ---
 const ManageProker = () => {
+  // ... (Kode full ManageProker ada di sini, aman, ga diubah)
   const [prokerList, setProkerList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentItem, setCurrentItem] = useState(null); 
   const [formData, setFormData] = useState({ Title: '', Description: '', Img: '', Link: '', TechStack: '', Features: '' });
-
   const fetchProker = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase.from('proker').select('*').order('id', { ascending: false });
@@ -69,12 +69,10 @@ const ManageProker = () => {
     else console.error("Error fetch proker:", error);
     setLoading(false);
   }, []);
-
   useEffect(() => {
     fetchProker();
     AOS.refresh();
   }, [fetchProker]);
-
   const handleOpenModal = (item) => {
     if (item) { 
       setCurrentItem(item);
@@ -92,17 +90,14 @@ const ManageProker = () => {
     }
     setIsModalOpen(true);
   };
-
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setCurrentItem(null);
   };
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -114,7 +109,6 @@ const ManageProker = () => {
       TechStack: formData.TechStack.split(',').map(s => s.trim()).filter(Boolean),
       Features: formData.Features.split(',').map(s => s.trim()).filter(Boolean),
     };
-
     let error;
     if (currentItem) { 
       const { error: updateError } = await supabase.from('proker').update(dataToSubmit).eq('id', currentItem.id);
@@ -123,7 +117,6 @@ const ManageProker = () => {
       const { error: insertError } = await supabase.from('proker').insert([dataToSubmit]);
       error = insertError;
     }
-
     if (error) {
       Swal.fire('Gagal!', `Data gagal disimpan: ${error.message}`, 'error');
     } else {
@@ -133,7 +126,6 @@ const ManageProker = () => {
     }
     setLoading(false);
   };
-
   const handleDelete = (id, title) => {
     Swal.fire({
       title: 'Lu yakin, ngab?',
@@ -160,7 +152,6 @@ const ManageProker = () => {
       }
     });
   };
-
   return (
     <div data-aos="fade-up" data-aos-delay="200">
       <button
@@ -170,7 +161,6 @@ const ManageProker = () => {
         <Plus className="w-5 h-5" />
         Tambah Program Kerja
       </button>
-
       <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
         {loading && prokerList.length === 0 && <Loader2 className="w-6 h-6 animate-spin mx-auto" />}
         {prokerList.map(item => (
@@ -190,7 +180,6 @@ const ManageProker = () => {
           </div>
         ))}
       </div>
-
       <Modal isOpen={isModalOpen} onClose={handleCloseModal} title={currentItem ? 'Edit Proker' : 'Tambah Proker Baru'}>
         <form onSubmit={handleSubmit} className="space-y-4">
           <InputForm label="Judul Proker" name="Title" value={formData.Title} onChange={handleChange} />
@@ -271,7 +260,6 @@ const ManageWorkshop = () => {
       }
     });
   };
-
   return (
     <div data-aos="fade-up" data-aos-delay="200">
       <button
@@ -281,7 +269,6 @@ const ManageWorkshop = () => {
         <Plus className="w-5 h-5" />
         Tambah Workshop/Riset
       </button>
-
       <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
         {loading && workshopList.length === 0 && <Loader2 className="w-6 h-6 animate-spin mx-auto" />}
         {workshopList.map(item => (
@@ -298,7 +285,6 @@ const ManageWorkshop = () => {
           </div>
         ))}
       </div>
-
       <Modal isOpen={isModalOpen} onClose={handleCloseModal} title={currentItem ? 'Edit Workshop' : 'Tambah Workshop Baru'}>
         <form onSubmit={handleSubmit} className="space-y-4">
           <InputForm label="Judul Workshop/Riset" name="Title" value={formData.Title} onChange={handleChange} />
@@ -318,6 +304,7 @@ const ManageWorkshop = () => {
 
 // --- (5) MANAGE KOMENTAR COMPONENT (Aman) ---
 const ManageKomentar = () => {
+  // ... (Kode full ManageKomentar ada di sini, aman, ga diubah)
   const [komentarList, setKomentarList] = useState([]);
   const [loading, setLoading] = useState(true);
   const fetchKomentar = useCallback(async () => {
@@ -351,7 +338,6 @@ const ManageKomentar = () => {
     else { Swal.fire('Sip!', 'Status pin berhasil di-update.', 'success'); fetchKomentar(); }
     setLoading(false);
   };
-
   return (
     <div data-aos="fade-up" data-aos-delay="200">
       <h3 className="text-xl font-semibold text-white mb-4">Manage Guestbook</h3>
