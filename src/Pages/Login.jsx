@@ -20,9 +20,7 @@ const LoginPage = () => {
     AOS.init({ once: true, duration: 1000 });
   }, []);
 
-  // --- PENTING: Cek Sesi ---
-  // Cek kalo admin UDAH login, langsung lempar ke dashboard.
-  // Ga perlu login lagi.
+  // Cek Sesi (Aman)
   useEffect(() => {
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -33,27 +31,24 @@ const LoginPage = () => {
     checkSession();
   }, [navigate]);
 
+  // handleLogin (Aman)
   const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
 
     try {
-      // Ini fungsi magic dari Supabase Auth
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email,
         password: password,
       });
 
       if (error) {
-        throw error; // Lempar error kalo ada
+        throw error;
       }
 
-      // Kalo sukses, 'data.session' bakal keisi
       if (data.session) {
         console.log('Login sukses, ngab!');
-        // 'session' otomatis kesimpen di browser.
-        // Langsung redirect ke halaman admin.
         navigate('/admin'); 
       }
 
