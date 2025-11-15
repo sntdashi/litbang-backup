@@ -660,41 +660,43 @@ const ManageAdmin = () => {
     }
     setLoading(false);
   }, []);
-
   useEffect(() => {
     fetchAdmins();
     AOS.refresh();
   }, [fetchAdmins]);
-
-  const handleAddAdmin = () => {
-    Swal.fire({
-      title: 'Cara Nambah Admin Baru (Versi Aman)',
-      html: `
-        <div class="text-left text-gray-300 space-y-3">
-          <p>Ngab, nambah admin dari sini bahaya (bisa nge-leak *service key*). Ini cara paling aman:</p>
-          <ol class="list-decimal list-inside space-y-2">
-            <li>Buka <strong>Dashboard Supabase</strong> lu.</li>
-            <li>Masuk ke <strong>Authentication</strong> -> <strong>Users</strong>.</li>
-            <li>Klik <strong>"Add user"</strong> (atau "Invite user") & daftarin email admin baru.</li>
-            <li>Buka <strong>Table Editor</strong> -> tabel <strong>"profiles"</strong>.</li>
-            <li>Cari email baru tadi, ganti kolom <strong>"role"</strong> nya dari "user" jadi <strong>"admin"</strong>.</li>
-            <li>Klik <strong>Save</strong>.</li>
-          </ol>
-          <p>Beres! Suruh admin baru cek email & login.</p>
-        </div>
-      `,
-      icon: 'info',
-      confirmButtonText: 'Ngerti, Ngab!',
-      confirmButtonColor: '#8B0000', 
-      background: '#0d0a1f',
-      color: '#ffffff' 
-    });
+  const handleSubmitNewAdmin = async (e) => {
+    e.preventDefault();
+    if (!adminEmail || !adminPassword) {
+      Swal.fire('Error', 'Email & Password ga boleh kosong', 'error');
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('create-admin', {
+        body: { email: adminEmail, password: adminPassword },
+      })
+      if (error) throw error; 
+      Swal.fire('Slay!', `Admin baru ${adminEmail} berhasil dibuat!`, 'success');
+      setIsModalOpen(false);
+      setAdminEmail('');
+      setAdminPassword('');
+      fetchAdmins();
+    } catch (error) {
+      console.error('Error invoke fungsi:', error);
+      Swal.fire({
+        title: 'Gagal!',
+        text: error.message || 'Gagal nambah admin. Cek console.',
+        icon: 'error',
+        background: '#0d0a1f', color: '#ffffff'
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
-
   return (
     <div data-aos="fade-up" data-aos-delay="200">
       <button
-        onClick={handleAddAdmin}
+        onClick={() => setIsModalOpen(true)}
         className="mb-6 flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-600 to-red-800 text-white font-semibold rounded-lg shadow-lg hover:scale-105 transition-transform"
       >
         <Plus className="w-5 h-5" />
@@ -718,6 +720,33 @@ const ManageAdmin = () => {
           </div>
         ))}
       </div>
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Tambah Admin Baru">
+        <form onSubmit={handleSubmitNewAdmin} className="space-y-4">
+          <InputForm 
+            label="Email Admin Baru" 
+            name="email" 
+            type="email"
+            value={adminEmail} 
+            onChange={(e) => setAdminEmail(e.target.value)} 
+            placeholder="adminbaru@email.com"
+          />
+          <InputForm 
+            label="Password Admin Baru" 
+            name="password" 
+            type="password"
+            value={adminPassword} 
+            onChange={(e) => setAdminPassword(e.target.value)} 
+            placeholder="Minimal 6 karakter"
+          />
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full mt-4 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-red-600 to-red-800 text-white font-semibold rounded-lg shadow-lg hover:scale-105 transition-transform disabled:opacity-50"
+          >
+            {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Simpan Admin Baru'}
+          </button>
+        </form>
+      </Modal>
     </div>
   );
 };
