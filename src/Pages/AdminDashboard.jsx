@@ -513,11 +513,138 @@ const ManageAnggota = () => {
 };
 
 
-// --- (6) MANAGE ADMIN COMPONENT (Aman) ---
-const ManageAdmin = () => {
-  const [adminList, setAdminList] = useState([]);
+// --- 7. KOMPONEN BARU: MANAGE IDE (INI YANG KETINGGALAN) ---
+const ManageIde = () => {
+  const [ideList, setIdeList] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const fetchIde = useCallback(async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('ide_bank')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (error) {
+      console.error("Error fetching ide:", error);
+      Swal.fire('Gagal!', 'Gagal ngambil list ide.', 'error');
+    } else {
+      setIdeList(data || []);
+    }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    fetchIde();
+    AOS.refresh();
+  }, [fetchIde]);
+
+  const handleDelete = (id, title) => {
+    Swal.fire({
+      title: 'Lu yakin, ngab?',
+      text: `Mau hapus ide "${title}"?`,
+      icon: 'warning',
+      showCancelButton: true, confirmButtonColor: '#d33',
+      confirmButtonText: 'Iya, Hapus Aja!', cancelButtonText: 'Ga jadi',
+      background: '#0d0a1f', color: '#ffffff'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        setLoading(true);
+        const { error } = await supabase.from('ide_bank').delete().eq('id', id);
+        if (error) Swal.fire('Gagal!', `Gagal hapus data: ${error.message}`, 'error');
+        else { Swal.fire('Beres!', 'Ide berhasil dihapus.', 'success'); fetchIde(); }
+        setLoading(false);
+      }
+    });
+  };
+
+  const handleUpdateStatus = async (id, currentStatus) => {
+    const nextStatus = {
+      'Pending': 'Di-review',
+      'Di-review': 'Diterima',
+      'Diterima': 'Pending',
+    };
+    const newStatus = nextStatus[currentStatus] || 'Pending';
+
+    setLoading(true);
+    const { error } = await supabase
+      .from('ide_bank')
+      .update({ status: newStatus })
+      .eq('id', id);
+
+    if (error) Swal.fire('Gagal!', `Gagal update status: ${error.message}`, 'error');
+    else fetchIde();
+    setLoading(false);
+  };
+
+  const getStatusColor = (status) => {
+    if (status === 'Diterima') return 'bg-green-500/20 text-green-300';
+    if (status === 'Di-review') return 'bg-yellow-500/20 text-yellow-300';
+    return 'bg-gray-500/20 text-gray-300'; // Default 'Pending'
+  };
+
+  return (
+    <div data-aos="fade-up" data-aos-delay="200">
+      <h3 className="text-xl font-semibold text-white mb-4">Manage Kotak Ide</h3>
+      <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2 custom-scrollbar">
+        {loading && ideList.length === 0 && <Loader2 className="w-6 h-6 animate-spin mx-auto" />}
+        
+        {ideList.map(item => (
+          <div 
+            key={item.id} 
+            className="bg-white/5 border border-white/10 p-4 rounded-lg"
+          >
+            <div className="flex justify-between items-start">
+              <div>
+                <h4 className="font-bold text-white text-lg">{item.ide_title}</h4>
+                <p className="text-gray-400 text-sm mt-1 mb-2">
+                  Dari: <span className="font-medium text-gray-300">{item.nama_pengirim}</span>
+                </p>
+                <p className="text-gray-200 text-base">{item.ide_deskripsi}</p>
+                <span className="text-xs text-gray-500 mt-2 block">
+                  {new Date(item.created_at).toLocaleString()}
+                </span>
+              </div>
+              
+              <div className="flex flex-col gap-2 items-end flex-shrink-0 ml-4">
+                <button 
+                  onClick={() => handleUpdateStatus(item.id, item.status)}
+                  className={`px-3 py-1 text-xs font-medium rounded-full transition-transform hover:scale-105 ${getStatusColor(item.status)}`}
+                >
+                  {item.status}
+                </button>
+                <button 
+                  onClick={() => handleDelete(item.id, item.ide_title)} 
+                  className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
+                >
+                  <Trash2 className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+
+        {(!loading && ideList.length === 0) && (
+          <div className="text-center py-10 text-gray-500">
+            <Lightbulb className="w-12 h-12 mx-auto mb-2" />
+            Kotak Ide masih kosong, ngab.
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+
+// --- (8) MANAGE ADMIN COMPONENT (Aman) ---
+const ManageAdmin = () => {
+  // ... (Kode full ManageAdmin ada di sini, aman, ga diubah)
+  const [adminList, setAdminList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [adminEmail, setAdminEmail] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const fetchAdmins = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase
@@ -750,12 +877,18 @@ const AdminDashboard = () => {
               isActive={activeTab === 'komentar'} 
               onClick={() => setActiveTab('komentar')}
             />
-            {/* --- INI TAB BARU-NYA --- */}
             <TabButton 
               icon={UserPlus} 
               label="Manage Anggota" 
               isActive={activeTab === 'anggota'} 
               onClick={() => setActiveTab('anggota')}
+            />
+            {/* --- INI TAB BARU-NYA --- */}
+            <TabButton 
+              icon={Lightbulb} 
+              label="Manage Ide" 
+              isActive={activeTab === 'ide'} 
+              onClick={() => setActiveTab('ide')}
             />
             {/* --------------------- */}
             <TabButton 
@@ -772,7 +905,8 @@ const AdminDashboard = () => {
           {activeTab === 'proker' && <ManageProker />}
           {activeTab === 'workshop' && <ManageWorkshop />}
           {activeTab === 'komentar' && <ManageKomentar />}
-          {activeTab === 'anggota' && <ManageAnggota />} {/* <-- INI KONTEN BARU-NYA */}
+          {activeTab === 'anggota' && <ManageAnggota />}
+          {activeTab === 'ide' && <ManageIde />} {/* <-- INI KONTEN BARU-NYA */}
           {activeTab === 'admin' && <ManageAdmin />}
         </section>
       </main>
