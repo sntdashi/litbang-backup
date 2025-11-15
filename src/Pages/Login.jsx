@@ -1,3 +1,5 @@
+// File: src/pages/Login.jsx (Versi Fix)
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient'; // Pastiin path ini bener
 import { useNavigate } from 'react-router-dom';
@@ -5,14 +7,7 @@ import { LogIn, Mail, Lock, Loader2, AlertTriangle } from 'lucide-react';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 
-// Ini komponen 'BackgroundEffect' dari WelcomeScreen.jsx lu
-// Kita pake lagi di sini biar stylenya konsisten!
-const BackgroundEffect = () => (
-  <div className="absolute inset-0 overflow-hidden -z-10">
-    <div className="absolute inset-0 bg-gradient-to-r from-indigo-600/20 to-purple-600/20 blur-3xl animate-pulse" />
-    <div className="absolute inset-0 bg-gradient-to-tr from-indigo-600/10 via-transparent to-purple-600/10 blur-2xl animate-float" />
-  </div>
-);
+// HAPUS 'BackgroundEffect' dari sini, karena udah ada di layout
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -75,29 +70,40 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="relative min-h-screen w-full flex items-center justify-center bg-[#1A0000] text-white px-4">
-      <BackgroundEffect />
+    // --- GANTI TOTAL LAYOUT DI SINI ---
+    // (Kita copy style dari IdeBank.jsx)
+    <div className="md:px-[10%] px-[5%] w-full sm:mt-0 pt-32 overflow-hidden pb-[10%]" id="login-page">
       
-      <div 
-        className="relative w-full max-w-md p-8 bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 shadow-2xl shadow-[#8B0000]/10"
-        data-aos="fade-up"
-      >
-        {/* Header Form */}
-        <div className="text-center mb-8" data-aos="fade-down" data-aos-delay="100">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-r from-[#8B0000] to-[#FF4444] mb-4 shadow-lg">
-            <LogIn className="w-8 h-8 text-white" />
-          </div>
-          <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white via-blue-100 to-purple-200">
+      {/* Judul (Style-nya kita samain kayak IdeBank.jsx) */}
+      <div className="text-center pb-10" data-aos="fade-up" data-aos-duration="1000">
+        <h2 className="inline-block text-3xl md:text-5xl font-bold text-center mx-auto text-transparent bg-clip-text bg-gradient-to-r from-[#8B0000] to-[#FF4444]">
+          <span style={{
+            color: '#8B0000',
+            backgroundImage: 'linear-gradient(45deg, #8B0000 10%, #FF4444 93%)',
+            WebkitBackgroundClip: 'text',
+            backgroundClip: 'text',
+            WebkitTextFillColor: 'transparent'
+          }}>
             Admin Panel Login
-          </h1>
-          <p className="text-gray-400 mt-2">Litbang HIMATIF</p>
-        </div>
+          </span>
+        </h2>
+        <p className="text-slate-400 max-w-2xl mx-auto text-sm md:text-base mt-2">
+          Masukkan kredensial admin untuk mengelola website.
+        </p>
+      </div>
 
-        {/* Form Login */}
+      {/* Form Card (Style-nya kita samain kayak IdeBank.jsx) */}
+      {/* Kita pake max-w-md biar form login ga terlalu lebar */}
+      <div 
+        className="max-w-md mx-auto bg-white/5 border border-white/10 rounded-2xl p-6 md:p-8 backdrop-blur-lg"
+        data-aos="fade-up" 
+        data-aos-duration="1200"
+      >
+        {/* Langsung Form Login (Form header-nya kita hapus biar rapi) */}
         <form onSubmit={handleLogin} className="space-y-6">
           {/* Input Email */}
           <div className="relative group" data-aos="fade-up" data-aos-delay="200">
-            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-[#8B0000] transition-colors" />
+            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-red-400 transition-colors" />
             <input
               type="email"
               placeholder="Email Admin"
@@ -111,7 +117,7 @@ const LoginPage = () => {
 
           {/* Input Password */}
           <div className="relative group" data-aos="fade-up" data-aos-delay="300">
-            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-[#8B0000] transition-colors" />
+            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-red-400 transition-colors" />
             <input
               type="password"
               placeholder="Password Admin"
