@@ -8,7 +8,8 @@ import {
   ShieldCheck, LayoutDashboard, MessageSquare, Code, FlaskConical, X, AlertTriangle,
   Home, 
   Users,
-  UserPlus // <-- 1. TAMBAHIN IKON BARU INI
+  UserPlus,
+  Lightbulb // <-- 1. INI DIA YANG KETINGGALAN
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import AOS from 'aos';
@@ -387,71 +388,58 @@ const ManageKomentar = () => {
 };
 
 
-// --- 2. BUAT KOMPONEN BARU INI (COPY DARI MANAGE WORKSHOP) ---
+// --- (6) MANAGE ANGGOTA COMPONENT (Aman) ---
 const ManageAnggota = () => {
+  // ... (Kode full ManageAnggota ada di sini, aman, ga diubah)
   const [anggotaList, setAnggotaList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
-  // Ganti formData
   const [formData, setFormData] = useState({ nama: '', jabatan: 'Anggota', foto_url: '' });
-
-  // Ganti fetchWorkshop -> fetchAnggota
   const fetchAnggota = useCallback(async () => {
     setLoading(true);
-    // Ganti 'workshop' -> 'anggota'
     const { data, error } = await supabase.from('anggota').select('*').order('id', { ascending: false });
     if (!error) setAnggotaList(data);
     else console.error("Error fetch anggota:", error);
     setLoading(false);
   }, []);
-
   useEffect(() => {
-    fetchAnggota(); // Ganti
+    fetchAnggota(); 
     AOS.refresh();
-  }, [fetchAnggota]); // Ganti
-
-  // Ganti handleOpenModal
+  }, [fetchAnggota]);
   const handleOpenModal = (item) => {
     if (item) {
       setCurrentItem(item);
       setFormData({ nama: item.nama, jabatan: item.jabatan, foto_url: item.foto_url || '' });
     } else {
       setCurrentItem(null);
-      setFormData({ nama: '', jabatan: 'Anggota', foto_url: '' }); // Default 'Anggota'
+      setFormData({ nama: '', jabatan: 'Anggota', foto_url: '' }); 
     }
     setIsModalOpen(true);
   };
-
   const handleCloseModal = () => setIsModalOpen(false);
   const handleChange = (e) => { const { name, value } = e.target; setFormData(prev => ({ ...prev, [name]: value })); };
-
-  // Ganti handleSubmit
   const handleSubmit = async (e) => {
     e.preventDefault(); setLoading(true); let error;
     if (currentItem) {
-      // Ganti 'workshop' -> 'anggota'
       const { error: updateError } = await supabase.from('anggota').update(formData).eq('id', currentItem.id);
       error = updateError;
     } else {
-      // Ganti 'workshop' -> 'anggota'
       const { error: insertError } = await supabase.from('anggota').insert([formData]);
       error = insertError;
     }
     if (error) Swal.fire('Gagal!', `Data gagal disimpan: ${error.message}`, 'error');
     else {
-      Swal.fire('Slay!', 'Anggota berhasil disimpan!', 'success'); // Ganti teks
+      Swal.fire('Slay!', 'Anggota berhasil disimpan!', 'success');
       handleCloseModal();
-      fetchAnggota(); // Ganti
+      fetchAnggota();
     }
     setLoading(false);
   };
-
-  // Ganti handleDelete
-  const handleDelete = (id, nama) => { // Ganti title -> nama
+  const handleDelete = (id, nama) => {
     Swal.fire({
       title: 'Lu yakin, ngab?',
-      text: `Mau hapus anggota "${nama}"?`, // Ganti teks
+      text: `Mau hapus anggota "${nama}"?`,
       icon: 'warning',
       showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6',
       confirmButtonText: 'Iya, Hapus Aja!', cancelButtonText: 'Ga jadi',
@@ -459,18 +447,16 @@ const ManageAnggota = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         setLoading(true);
-        // Ganti 'workshop' -> 'anggota'
         const { error } = await supabase.from('anggota').delete().eq('id', id);
         if (error) Swal.fire('Gagal!', `Gagal hapus data: ${error.message}`, 'error');
         else {
-          Swal.fire('Beres!', 'Data anggota berhasil dihapus.', 'success'); // Ganti teks
-          fetchAnggota(); // Ganti
+          Swal.fire('Beres!', 'Data anggota berhasil dihapus.', 'success');
+          fetchAnggota();
         }
         setLoading(false);
       }
     });
   };
-
   return (
     <div data-aos="fade-up" data-aos-delay="200">
       <button
@@ -478,16 +464,13 @@ const ManageAnggota = () => {
         className="mb-6 flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-600 to-red-800 text-white font-semibold rounded-lg shadow-lg hover:scale-105 transition-transform"
       >
         <Plus className="w-5 h-5" />
-        Tambah Anggota Baru {/* Ganti teks */}
+        Tambah Anggota Baru
       </button>
-
-      {/* Ganti List-nya */}
       <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
         {loading && anggotaList.length === 0 && <Loader2 className="w-6 h-6 animate-spin mx-auto" />}
         {anggotaList.map(item => (
           <div key={item.id} className="bg-white/5 border border-white/10 p-4 rounded-lg flex justify-between items-center">
             <div className="flex items-center gap-4">
-              {/* Tunjukin foto profil */}
               {item.foto_url ? (
                 <img src={item.foto_url} alt={item.nama} className="w-12 h-12 rounded-full object-cover border-2 border-red-500/50" />
               ) : (
@@ -495,7 +478,6 @@ const ManageAnggota = () => {
                   <UserPlus className="w-6 h-6" />
                 </div>
               )}
-              {/* Tunjukin nama & jabatan */}
               <div>
                 <h3 className="font-bold text-white text-lg">{item.nama}</h3>
                 <p className="text-gray-400 text-sm">{item.jabatan}</p>
@@ -505,7 +487,6 @@ const ManageAnggota = () => {
               <button onClick={() => handleOpenModal(item)} className="p-2 text-red-300 hover:bg-red-500/20 rounded-lg transition-colors">
                 <Edit3 className="w-5 h-5" />
               </button>
-              {/* Ganti handleDelete-nya */}
               <button onClick={() => handleDelete(item.id, item.nama)} className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors">
                 <Trash2 className="w-5 h-5" />
               </button>
@@ -513,8 +494,6 @@ const ManageAnggota = () => {
           </div>
         ))}
       </div>
-
-      {/* Ganti Form di Modal */}
       <Modal isOpen={isModalOpen} onClose={handleCloseModal} title={currentItem ? 'Edit Anggota' : 'Tambah Anggota Baru'}>
         <form onSubmit={handleSubmit} className="space-y-4">
           <InputForm label="Nama Anggota" name="nama" value={formData.nama} onChange={handleChange} placeholder="John Doe" />
