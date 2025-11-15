@@ -216,6 +216,7 @@ const ManageProker = () => {
 
 // --- (4) MANAGE WORKSHOP COMPONENT (Aman) ---
 const ManageWorkshop = () => {
+  // ... (Kode full ManageWorkshop ada di sini, aman, ga diubah)
   const [workshopList, setWorkshopList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -766,7 +767,7 @@ const InputForm = ({ label, name, value, onChange, placeholder, isTextarea = fal
 );
 
 
-// --- (7) KOMPONEN UTAMA: ADMIN DASHBOARD (Aman) ---
+// --- (9) KOMPONEN UTAMA: ADMIN DASHBOARD (Aman) ---
 const AdminDashboard = () => {
   const [user, setUser] = useState(null);
   const [activeTab, setActiveTab] = useState('proker'); 
