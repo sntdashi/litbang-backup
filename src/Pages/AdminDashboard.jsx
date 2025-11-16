@@ -756,7 +756,7 @@ const ManageIde = () => {
         {(!loading && ideList.length === 0) && (
           <div className="text-center py-10 text-gray-500">
             <Lightbulb className="w-12 h-12 mx-auto mb-2" />
-            Kotak Ide masih kosong, bang.
+            Kotak Ide masih kosong, ngab.
           </div>
         )}
       </div>
