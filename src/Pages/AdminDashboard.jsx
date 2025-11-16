@@ -1,15 +1,17 @@
-// --- UBAH 1 BARIS INI ---
+// File: src/pages/AdminDashboard.jsx (Versi FINAL FIX SEMUANYA)
+
 import ReactDOM from 'react-dom'; 
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../supabaseClient'; 
 import { useNavigate } from 'react-router-dom';
 import { 
   LogOut, Plus, Trash2, Edit3, Pin, PinOff, Loader2, 
-  ShieldCheck, LayoutDashboard, MessageSquare, Code, FlaskConical, X, AlertTriangle,
+  ShieldCheck, MessageSquare, Code, FlaskConical, X, AlertTriangle,
   Home, 
   Users,
   UserPlus,
-  Lightbulb // <-- 1. INI DIA YANG KETINGGALAN
+  Lightbulb,
+  Image
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import AOS from 'aos';
@@ -23,29 +25,19 @@ const BackgroundEffect = () => (
   </div>
 );
 
-// --- (2) MODAL COMPONENT (Versi Final Fix Pake PORTAL) ---
+// --- (2) MODAL COMPONENT (Aman) ---
 const Modal = ({ isOpen, onClose, title, children }) => {
   if (!isOpen) return null;
-
-  // Ini dia magic-nya: "Teleport" modal ini ke document.body
-  // Biar dia ga nempel di dalem <section> yang nge-blur
   return ReactDOM.createPortal( 
-    
-    // 1. 'grid place-items-center' (biar nengah)
-    // 2. 'backdrop-blur-lg' (biar ngeblur!)
     <div 
       className="fixed inset-0 bg-black/80 backdrop-blur-lg z-50 grid place-items-center p-4"
       onClick={onClose}
     >
-      
-      {/* - 'max-h-[90vh]' (Batesin tinggi)
-        - 'overflow-y-auto' (Biar bisa di-scroll)
-      */}
       <div 
         className="relative w-full max-w-2xl bg-[#0d0a1f] border border-white/10 rounded-2xl shadow-xl p-6 max-h-[90vh] overflow-y-auto custom-scrollbar"
         data-aos="fade-up"
         data-aos-duration="300"
-        onClick={(e) => e.stopPropagation()} // Biar ga nutup pas klik form
+        onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={onClose}
@@ -59,19 +51,19 @@ const Modal = ({ isOpen, onClose, title, children }) => {
         {children}
       </div>
     </div>,
-    document.body // <-- INI LOKASI TELEPORT-NYA
+    document.body 
   );
 };
 // --- AKHIR MODAL ---
 
-// --- (3) MANAGE PROKER COMPONENT (Aman) ---
+// --- (3) MANAGE PROKER COMPONENT (Fix Tombol) ---
 const ManageProker = () => {
-  // ... (Kode full ManageProker ada di sini, aman, ga diubah)
   const [prokerList, setProkerList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentItem, setCurrentItem] = useState(null); 
   const [formData, setFormData] = useState({ Title: '', Description: '', Img: '', Link: '', TechStack: '', Features: '' });
+
   const fetchProker = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase.from('proker').select('*').order('id', { ascending: false });
@@ -79,10 +71,12 @@ const ManageProker = () => {
     else console.error("Error fetch proker:", error);
     setLoading(false);
   }, []);
+
   useEffect(() => {
     fetchProker();
     AOS.refresh();
   }, [fetchProker]);
+
   const handleOpenModal = (item) => {
     if (item) { 
       setCurrentItem(item);
@@ -100,14 +94,17 @@ const ManageProker = () => {
     }
     setIsModalOpen(true);
   };
+
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setCurrentItem(null);
   };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -119,6 +116,7 @@ const ManageProker = () => {
       TechStack: formData.TechStack.split(',').map(s => s.trim()).filter(Boolean),
       Features: formData.Features.split(',').map(s => s.trim()).filter(Boolean),
     };
+
     let error;
     if (currentItem) { 
       const { error: updateError } = await supabase.from('proker').update(dataToSubmit).eq('id', currentItem.id);
@@ -127,6 +125,7 @@ const ManageProker = () => {
       const { error: insertError } = await supabase.from('proker').insert([dataToSubmit]);
       error = insertError;
     }
+
     if (error) {
       Swal.fire('Gagal!', `Data gagal disimpan: ${error.message}`, 'error');
     } else {
@@ -136,6 +135,7 @@ const ManageProker = () => {
     }
     setLoading(false);
   };
+
   const handleDelete = (id, title) => {
     Swal.fire({
       title: 'Lu yakin, ngab?',
@@ -162,15 +162,17 @@ const ManageProker = () => {
       }
     });
   };
+
   return (
     <div data-aos="fade-up" data-aos-delay="200">
       <button
         onClick={() => handleOpenModal(null)}
-        className="mb-6 flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-600 to-red-800 text-white font-semibold rounded-lg shadow-lg hover:scale-105 transition-transform"
+        className="mb-6 flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-600 to-red-800 text-white font-semibold rounded-lg shadow-lg hover:scale-105 active:scale-[0.98] transition-all duration-300"
       >
         <Plus className="w-5 h-5" />
         Tambah Program Kerja
       </button>
+
       <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
         {loading && prokerList.length === 0 && <Loader2 className="w-6 h-6 animate-spin mx-auto" />}
         {prokerList.map(item => (
@@ -190,6 +192,7 @@ const ManageProker = () => {
           </div>
         ))}
       </div>
+
       <Modal isOpen={isModalOpen} onClose={handleCloseModal} title={currentItem ? 'Edit Proker' : 'Tambah Proker Baru'}>
         <form onSubmit={handleSubmit} className="space-y-4">
           <InputForm label="Judul Proker" name="Title" value={formData.Title} onChange={handleChange} />
@@ -211,10 +214,11 @@ const ManageProker = () => {
             placeholder="Contoh: Login Admin,CRUD Proker,Realtime Comment"
             isTextarea={true} 
           />
+          {/* --- FIX TOMBOL KAKU --- */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full mt-4 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-red-600 to-red-800 text-white font-semibold rounded-lg shadow-lg hover:scale-105 transition-transform disabled:opacity-50"
+            className="w-full mt-4 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-red-600 to-red-800 text-white font-semibold rounded-lg shadow-lg hover:scale-105 active:scale-[0.98] transition-all duration-300 disabled:opacity-50"
           >
             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Simpan Data'}
           </button>
@@ -224,9 +228,8 @@ const ManageProker = () => {
   );
 };
 
-// --- (4) MANAGE WORKSHOP COMPONENT (Aman) ---
+// --- (4) MANAGE WORKSHOP COMPONENT (Fix Tombol) ---
 const ManageWorkshop = () => {
-  // ... (Kode full ManageWorkshop ada di sini, aman, ga diubah)
   const [workshopList, setWorkshopList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -271,11 +274,12 @@ const ManageWorkshop = () => {
       }
     });
   };
+
   return (
     <div data-aos="fade-up" data-aos-delay="200">
       <button
         onClick={() => handleOpenModal(null)}
-        className="mb-6 flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-600 to-red-800 text-white font-semibold rounded-lg shadow-lg hover:scale-105 transition-transform"
+        className="mb-6 flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-600 to-red-800 text-white font-semibold rounded-lg shadow-lg hover:scale-105 active:scale-[0.98] transition-all duration-300"
       >
         <Plus className="w-5 h-5" />
         Tambah Workshop/Riset
@@ -300,10 +304,12 @@ const ManageWorkshop = () => {
         <form onSubmit={handleSubmit} className="space-y-4">
           <InputForm label="Judul Workshop/Riset" name="Title" value={formData.Title} onChange={handleChange} />
           <InputForm label="Image URL (Poster/Foto)" name="Img" value={formData.Img} onChange={handleChange} placeholder="https://... (link ke gambar)" />
+          
+          {/* --- FIX TOMBOL KAKU --- */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full mt-4 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-red-600 to-red-800 text-white font-semibold rounded-lg shadow-lg hover:scale-105 transition-transform disabled:opacity-50"
+            className="w-full mt-4 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-red-600 to-red-800 text-white font-semibold rounded-lg shadow-lg hover:scale-105 active:scale-[0.98] transition-all duration-300 disabled:opacity-50"
           >
             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Simpan Data'}
           </button>
@@ -385,9 +391,8 @@ const ManageKomentar = () => {
 };
 
 
-// --- (6) MANAGE ANGGOTA COMPONENT (Aman) ---
+// --- (7) MANAGE ANGGOTA COMPONENT (Fix Tombol) ---
 const ManageAnggota = () => {
-  // ... (Kode full ManageAnggota ada di sini, aman, ga diubah)
   const [anggotaList, setAnggotaList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -458,7 +463,7 @@ const ManageAnggota = () => {
     <div data-aos="fade-up" data-aos-delay="200">
       <button
         onClick={() => handleOpenModal(null)}
-        className="mb-6 flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-600 to-red-800 text-white font-semibold rounded-lg shadow-lg hover:scale-105 transition-transform"
+        className="mb-6 flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-600 to-red-800 text-white font-semibold rounded-lg shadow-lg hover:scale-105 active:scale-[0.98] transition-all duration-300"
       >
         <Plus className="w-5 h-5" />
         Tambah Anggota Baru
@@ -496,10 +501,12 @@ const ManageAnggota = () => {
           <InputForm label="Nama Anggota" name="nama" value={formData.nama} onChange={handleChange} placeholder="John Doe" />
           <InputForm label="Jabatan" name="jabatan" value={formData.jabatan} onChange={handleChange} placeholder="Anggota" />
           <InputForm label="URL Foto Profil (Opsional)" name="foto_url" value={formData.foto_url} onChange={handleChange} placeholder="https://... (link ke gambar)" />
+          
+          {/* --- FIX TOMBOL KAKU --- */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full mt-4 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-red-600 to-red-800 text-white font-semibold rounded-lg shadow-lg hover:scale-105 transition-transform disabled:opacity-50"
+            className="w-full mt-4 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-red-600 to-red-800 text-white font-semibold rounded-lg shadow-lg hover:scale-105 active:scale-[0.98] transition-all duration-300 disabled:opacity-50"
           >
             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Simpan Anggota'}
           </button>
@@ -510,11 +517,10 @@ const ManageAnggota = () => {
 };
 
 
-// --- 7. KOMPONEN BARU: MANAGE IDE (INI YANG KETINGGALAN) ---
+// --- (8) MANAGE IDE COMPONENT (Aman) ---
 const ManageIde = () => {
   const [ideList, setIdeList] = useState([]);
   const [loading, setLoading] = useState(true);
-
   const fetchIde = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase
@@ -530,12 +536,7 @@ const ManageIde = () => {
     }
     setLoading(false);
   }, []);
-
-  useEffect(() => {
-    fetchIde();
-    AOS.refresh();
-  }, [fetchIde]);
-
+  useEffect(() => { fetchIde(); AOS.refresh(); }, [fetchIde]);
   const handleDelete = (id, title) => {
     Swal.fire({
       title: 'Lu yakin, ngab?',
@@ -554,7 +555,6 @@ const ManageIde = () => {
       }
     });
   };
-
   const handleUpdateStatus = async (id, currentStatus) => {
     const nextStatus = {
       'Pending': 'Di-review',
@@ -573,13 +573,11 @@ const ManageIde = () => {
     else fetchIde();
     setLoading(false);
   };
-
   const getStatusColor = (status) => {
     if (status === 'Diterima') return 'bg-green-500/20 text-green-300';
     if (status === 'Di-review') return 'bg-yellow-500/20 text-yellow-300';
     return 'bg-gray-500/20 text-gray-300'; // Default 'Pending'
   };
-
   return (
     <div data-aos="fade-up" data-aos-delay="200">
       <h3 className="text-xl font-semibold text-white mb-4">Manage Kotak Ide</h3>
@@ -624,7 +622,7 @@ const ManageIde = () => {
         {(!loading && ideList.length === 0) && (
           <div className="text-center py-10 text-gray-500">
             <Lightbulb className="w-12 h-12 mx-auto mb-2" />
-            Kotak Ide masih kosong, ngab.
+            Kotak Ide masih kosong, bang.
           </div>
         )}
       </div>
@@ -633,9 +631,8 @@ const ManageIde = () => {
 };
 
 
-// --- (8) MANAGE ADMIN COMPONENT (Aman) ---
+// --- (9) MANAGE ADMIN COMPONENT (Fix Tombol) ---
 const ManageAdmin = () => {
-  // ... (Kode full ManageAdmin ada di sini, aman, ga diubah)
   const [adminList, setAdminList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -694,7 +691,7 @@ const ManageAdmin = () => {
     <div data-aos="fade-up" data-aos-delay="200">
       <button
         onClick={() => setIsModalOpen(true)}
-        className="mb-6 flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-600 to-red-800 text-white font-semibold rounded-lg shadow-lg hover:scale-105 transition-transform"
+        className="mb-6 flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-600 to-red-800 text-white font-semibold rounded-lg shadow-lg hover:scale-105 active:scale-[0.98] transition-all duration-300"
       >
         <Plus className="w-5 h-5" />
         Tambah Admin Baru
@@ -735,10 +732,12 @@ const ManageAdmin = () => {
             onChange={(e) => setAdminPassword(e.target.value)} 
             placeholder="Minimal 6 karakter"
           />
+          
+          {/* --- FIX TOMBOL KAKU --- */}
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full mt-4 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-red-600 to-red-800 text-white font-semibold rounded-lg shadow-lg hover:scale-105 transition-transform disabled:opacity-50"
+            className="w-full mt-4 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-red-600 to-red-800 text-white font-semibold rounded-lg shadow-lg hover:scale-105 active:scale-[0.98] transition-all duration-300 disabled:opacity-50"
           >
             {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Simpan Admin Baru'}
           </button>
@@ -747,10 +746,8 @@ const ManageAdmin = () => {
     </div>
   );
 };
-// --- AKHIR KOMPONEN BARU ---
 
-
-// Helper buat Form Input (Aman)
+// --- (10) Helper buat Form Input (Aman) ---
 const InputForm = ({ label, name, value, onChange, placeholder, isTextarea = false, type = 'text' }) => (
   <div>
     <label className="block text-sm font-medium text-gray-300 mb-1">{label}</label>
@@ -777,13 +774,11 @@ const InputForm = ({ label, name, value, onChange, placeholder, isTextarea = fal
 );
 
 
-// --- (9) KOMPONEN UTAMA: ADMIN DASHBOARD (Aman) ---
+// --- (11) KOMPONEN UTAMA: ADMIN DASHBOARD (Aman) ---
 const AdminDashboard = () => {
   const [user, setUser] = useState(null);
   const [activeTab, setActiveTab] = useState('proker'); 
   const navigate = useNavigate();
-
-  // Protected route (Aman)
   useEffect(() => {
     const checkSessionAndRole = async () => {
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
@@ -815,8 +810,6 @@ const AdminDashboard = () => {
     };
     checkSessionAndRole();
   }, [navigate]);
-
-  // Logout (Aman)
   const handleLogout = async () => {
     Swal.fire({
       title: 'Mau Logout, ngab?', icon: 'question',
@@ -829,8 +822,6 @@ const AdminDashboard = () => {
       }
     });
   };
-
-  // Loading state (Aman)
   if (!user) {
     return (
       <div className="min-h-screen w-full flex items-center justify-center bg-[#1A0000]">
@@ -843,8 +834,6 @@ const AdminDashboard = () => {
   return (
     <div className="relative min-h-screen w-full bg-[#1A0000] text-white p-4 md:p-8">
       <BackgroundEffect />
-
-      {/* Header Admin (Aman) */}
       <header 
         className="relative z-10 flex flex-col md:flex-row justify-between items-center mb-8 p-4 bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl"
         data-aos="fade-down"
@@ -856,7 +845,6 @@ const AdminDashboard = () => {
             <p className="text-sm text-gray-400">Login sebagai: {user.email}</p>
           </div>
         </div>
-        
         <div className="flex gap-4 items-center mt-4 md:mt-0">
           <button
               onClick={() => navigate('/')}
@@ -873,71 +861,33 @@ const AdminDashboard = () => {
             <span>Logout</span>
           </button>
         </div>
-
       </header>
-
-      {/* Konten Admin (Aman) */}
       <main className="relative z-10 flex flex-col lg:flex-row gap-8">
-        {/* --- 3. UBAH NAVIGASI DI SINI --- */}
         <nav 
           className="lg:w-1/4 p-4 bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl self-start"
           data-aos="fade-right"
           data-aos-delay="100"
         >
           <ul className="space-y-2">
-            <TabButton 
-              icon={Code} 
-              label="Manage Proker" 
-              isActive={activeTab === 'proker'} 
-              onClick={() => setActiveTab('proker')}
-            />
-            <TabButton 
-              icon={FlaskConical} 
-              label="Manage Workshop" 
-              isActive={activeTab === 'workshop'} 
-              onClick={() => setActiveTab('workshop')}
-            />
-            <TabButton 
-              icon={MessageSquare} 
-              label="Manage Komentar" 
-              isActive={activeTab === 'komentar'} 
-              onClick={() => setActiveTab('komentar')}
-            />
-            <TabButton 
-              icon={UserPlus} 
-              label="Manage Anggota" 
-              isActive={activeTab === 'anggota'} 
-              onClick={() => setActiveTab('anggota')}
-            />
-            {/* --- INI TAB BARU-NYA --- */}
-            <TabButton 
-              icon={Lightbulb} 
-              label="Manage Ide" 
-              isActive={activeTab === 'ide'} 
-              onClick={() => setActiveTab('ide')}
-            />
-            {/* --------------------- */}
-            <TabButton 
-              icon={Users} 
-              label="Manage Admin" 
-              isActive={activeTab === 'admin'} 
-              onClick={() => setActiveTab('admin')}
-            />
+            <TabButton icon={Code} label="Manage Proker" isActive={activeTab === 'proker'} onClick={() => setActiveTab('proker')} />
+            <TabButton icon={FlaskConical} label="Manage Workshop" isActive={activeTab === 'workshop'} onClick={() => setActiveTab('workshop')} />
+            <TabButton icon={Image} label="Manage Galeri" isActive={activeTab === 'galeri'} onClick={() => setActiveTab('galeri')} />
+            <TabButton icon={MessageSquare} label="Manage Komentar" isActive={activeTab === 'komentar'} onClick={() => setActiveTab('komentar')} />
+            <TabButton icon={UserPlus} label="Manage Anggota" isActive={activeTab === 'anggota'} onClick={() => setActiveTab('anggota')} />
+            <TabButton icon={Lightbulb} label="Manage Ide" isActive={activeTab === 'ide'} onClick={() => setActiveTab('ide')} />
+            <TabButton icon={Users} label="Manage Admin" isActive={activeTab === 'admin'} onClick={() => setActiveTab('admin')} />
           </ul>
         </nav>
-
-        {/* --- 4. UBAH KONTEN DI SINI --- */}
         <section className="lg:w-3/4 p-6 bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl min-h-[60vh]">
           {activeTab === 'proker' && <ManageProker />}
           {activeTab === 'workshop' && <ManageWorkshop />}
+          {activeTab === 'galeri' && <ManageGaleri />}
           {activeTab === 'komentar' && <ManageKomentar />}
           {activeTab === 'anggota' && <ManageAnggota />}
-          {activeTab === 'ide' && <ManageIde />} {/* <-- INI KONTEN BARU-NYA */}
+          {activeTab === 'ide' && <ManageIde />}
           {activeTab === 'admin' && <ManageAdmin />}
         </section>
       </main>
-
-      {/* Style buat scrollbar (Aman) */}
       <style jsx>{`
         .custom-scrollbar::-webkit-scrollbar {
             width: 6px;
