@@ -1,4 +1,4 @@
-// File: src/App.jsx (Versi Rute /aspirasi)
+// File: src/App.jsx (Versi Rute /galeri)
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import React, { useState } from 'react';
@@ -15,7 +15,8 @@ import ProjectDetails from "./components/ProjectDetail";
 import WelcomeScreen from "./Pages/WelcomeScreen";
 import NotFoundPage from "./Pages/404"; 
 import Struktur from "./Pages/Struktur";
-import IdeBank from "./Pages/IdeBank"; // <-- Ganti nama /ide jadi /aspirasi kalo mau
+import IdeBank from "./Pages/IdeBank";
+import GaleriPage from "./Pages/Galery"; // <-- 1. IMPORT HALAMAN BARU
 
 // --- Halaman Admin (Aman) ---
 import LoginPage from "./Pages/Login";
@@ -23,7 +24,7 @@ import AdminDashboard from "./Pages/AdminDashboard";
 
 import { AnimatePresence } from 'framer-motion';
 
-// --- (1) Layout Halaman Utama / Landing Page ---
+// --- (1) Layout Halaman Utama (Aman) ---
 const LandingPage = ({ showWelcome, setShowWelcome, activeTab, setActiveTab }) => {
   return (
     <>
@@ -42,7 +43,6 @@ const LandingPage = ({ showWelcome, setShowWelcome, activeTab, setActiveTab }) =
           <Portofolio activeTab={activeTab} setActiveTab={setActiveTab} /> 
           <Struktur />
           <ContactPage />
-          {/* <IdeBank /> <-- Udah dihapus dari sini */}
           <footer>
             <center>
               <hr className="my-3 border-gray-400 opacity-15 sm:mx-auto lg:my-6 text-center" />
@@ -74,7 +74,7 @@ const ProjectPageLayout = () => (
   </>
 );
 
-// --- 3. BIKIN LAYOUT BARU BUAT HALAMAN BIASA ---
+// --- 3. Layout Halaman Biasa (Aman) ---
 const StandardPageLayout = ({ children }) => (
   <>
     <Navbar />
@@ -115,17 +115,19 @@ function App() {
         <Route path="/project/:id" element={<ProjectPageLayout />} />
          
         {/* === RUTE ADMIN (Aman) === */}
-        <Route path="/login" element={<LoginPage />} />
+        <Route path="/login" element={ <StandardPageLayout><LoginPage /></StandardPageLayout> } />
         <Route path="/admin" element={<AdminDashboard />} />
 
-        {/* --- 4. RUTE BARU BUAT KOTAK IDE (UDAH GANTI /aspirasi) --- */}
+        {/* Rute Aspirasi (Aman) */}
         <Route 
           path="/aspirasi" 
-          element={
-            <StandardPageLayout>
-              <IdeBank />
-            </StandardPageLayout>
-          } 
+          element={ <StandardPageLayout><IdeBank /></StandardPageLayout> } 
+        />
+        
+        {/* --- 2. TAMBAH RUTE BARU GALERI --- */}
+        <Route 
+          path="/galeri" 
+          element={ <StandardPageLayout><GaleriPage /></StandardPageLayout> } 
         />
 
         {/* === RUTE 404 (Aman) === */}
