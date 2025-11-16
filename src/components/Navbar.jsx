@@ -19,8 +19,8 @@ const Navbar = () => {
         { href: "#Home", label: "Home" },
         { href: "#About", label: "Tentang" },
         { href: "#proker", label: "Program Kerja" },
-        { to: "/galeri", label: "Galeri" }, // <-- 'Galeri' jadi link biasa
         { href: "#Contact", label: "Kontak" },
+        { to: "/galeri", label: "Galeri" }, // <-- 'Galeri' jadi link biasa
     ];
     // --- AKHIR PERUBAHAN ---
 
