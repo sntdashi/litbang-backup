@@ -74,12 +74,18 @@ const ProjectPageLayout = () => (
   </>
 );
 
-// --- 3. Layout Halaman Biasa (Aman) ---
+// --- 3. BIKIN LAYOUT BARU BUAT HALAMAN BIASA ---
 const StandardPageLayout = ({ children }) => (
-  <>
+  // 1. Tambah 'flex flex-col min-h-screen' di pembungkus utama
+  <div className="relative z-10 flex flex-col min-h-screen"> 
     <Navbar />
     <AnimatedBackground />
-    {children} 
+    
+    {/* 2. Tambah 'flex-grow' di sini biar kontennya "ngedorong" footer */}
+    <div className="flex-grow">
+      {children} 
+    </div>
+
     <footer>
       <center>
         <hr className="my-3 border-gray-400 opacity-15 sm:mx-auto lg:my-6 text-center" />
@@ -92,7 +98,7 @@ const StandardPageLayout = ({ children }) => (
         </span>
       </center>
     </footer>
-  </>
+  </div>
 );
 
 
