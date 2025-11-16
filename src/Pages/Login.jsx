@@ -55,7 +55,7 @@ const LoginPage = () => {
     } catch (error) {
       console.error('Error login:', error.message);
       if (error.message.includes('Invalid login credentials')) {
-        setError('Email atau password salah, ngab. Coba lagi.');
+        setError('Email atau password salah, bro. Coba lagi.');
       } else {
         setError('Gagal login, ada masalah jaringan kayaknya.');
       }
@@ -138,7 +138,7 @@ const LoginPage = () => {
             disabled={isLoading}
             data-aos="fade-up"
             data-aos-delay="400"
-            className="w-full bg-gradient-to-r from-[#8B0000] to-[#FF4444] text-white py-4 rounded-xl font-semibold transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-[#8B0000]/20 active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+            className="w-full bg-gradient-to-r from-[#8B0000] to-[#FF4444] text-white py-4 rounded-xl font-semibold transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-[#8B0000]/20 active:scale-[1.98] flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
           >
             {isLoading ? (
               <>
