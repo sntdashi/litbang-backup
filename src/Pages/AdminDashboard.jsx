@@ -319,9 +319,143 @@ const ManageWorkshop = () => {
   );
 };
 
-// --- (5) MANAGE KOMENTAR COMPONENT (Aman) ---
+// --- (5) MANAGE GALERI COMPONENT (Fix Dropdown + Tombol) ---
+const ManageGaleri = () => {
+  const [galeriList, setGaleriList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentItem, setCurrentItem] = useState(null);
+  const [formData, setFormData] = useState({ judul_foto: '', url_foto: '', kategori: 'Makrab' });
+  const fetchGaleri = useCallback(async () => {
+    setLoading(true);
+    const { data, error } = await supabase.from('galeri').select('*').order('created_at', { ascending: false });
+    if (!error) setGaleriList(data);
+    else console.error("Error fetch galeri:", error);
+    setLoading(false);
+  }, []);
+  useEffect(() => {
+    fetchGaleri();
+    AOS.refresh();
+  }, [fetchGaleri]);
+  const handleOpenModal = (item) => {
+    if (item) {
+      setCurrentItem(item);
+      setFormData({ judul_foto: item.judul_foto, url_foto: item.url_foto, kategori: item.kategori });
+    } else {
+      setCurrentItem(null);
+      setFormData({ judul_foto: '', url_foto: '', kategori: 'Makrab' });
+    }
+    setIsModalOpen(true);
+  };
+  const handleCloseModal = () => setIsModalOpen(false);
+  const handleChange = (e) => { const { name, value } = e.target; setFormData(prev => ({ ...prev, [name]: value })); };
+  const handleSubmit = async (e) => {
+    e.preventDefault(); setLoading(true); let error;
+    if (currentItem) {
+      const { error: updateError } = await supabase.from('galeri').update(formData).eq('id', currentItem.id);
+      error = updateError;
+    } else {
+      const { error: insertError } = await supabase.from('galeri').insert([formData]);
+      error = insertError;
+    }
+    if (error) Swal.fire('Gagal!', `Data gagal disimpan: ${error.message}`, 'error');
+    else {
+      Swal.fire('Slay!', 'Foto berhasil disimpan ke galeri!', 'success');
+      handleCloseModal();
+      fetchGaleri();
+    }
+    setLoading(false);
+  };
+  const handleDelete = (id, title) => {
+    Swal.fire({
+      title: 'Lu yakin, ngab?',
+      text: `Mau hapus foto "${title}"?`,
+      icon: 'warning',
+      showCancelButton: true, confirmButtonColor: '#d33',
+      confirmButtonText: 'Iya, Hapus Aja!', cancelButtonText: 'Ga jadi',
+      background: '#0d0a1f', color: '#ffffff'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        setLoading(true);
+        const { error } = await supabase.from('galeri').delete().eq('id', id);
+        if (error) Swal.fire('Gagal!', `Gagal hapus data: ${error.message}`, 'error');
+        else { Swal.fire('Beres!', 'Foto berhasil dihapus.', 'success'); fetchGaleri(); }
+        setLoading(false);
+      }
+    });
+  };
+
+  return (
+    <div data-aos="fade-up" data-aos-delay="200">
+      <button
+        onClick={() => handleOpenModal(null)}
+        className="mb-6 flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-600 to-red-800 text-white font-semibold rounded-lg shadow-lg hover:scale-105 active:scale-[0.98] transition-all duration-300"
+      >
+        <Plus className="w-5 h-5" />
+        Tambah Foto Galeri
+      </button>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-h-[70vh] overflow-y-auto pr-2 custom-scrollbar">
+        {loading && galeriList.length === 0 && <Loader2 className="w-6 h-6 animate-spin mx-auto col-span-full" />}
+        
+        {galeriList.map(item => (
+          <div key={item.id} className="relative group bg-white/5 border border-white/10 rounded-lg overflow-hidden">
+            <img src={item.url_foto} alt={item.judul_foto} className="w-full h-40 object-cover" />
+            <div className="p-3">
+              <h4 className="font-semibold text-white truncate">{item.judul_foto}</h4>
+              <p className="text-sm text-gray-400">{item.kategori}</p>
+            </div>
+            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2 items-center justify-center">
+              <button onClick={() => handleOpenModal(item)} className="p-2 text-red-300 bg-white/10 rounded-full hover:bg-white/20">
+                <Edit3 className="w-5 h-5" />
+              </button>
+              <button onClick={() => handleDelete(item.id, item.judul_foto)} className="p-2 text-red-400 bg-white/10 rounded-full hover:bg-white/20">
+                <Trash2 className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+      <Modal isOpen={isModalOpen} onClose={handleCloseModal} title={currentItem ? 'Edit Foto' : 'Tambah Foto Baru'}>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <InputForm label="Judul Foto" name="judul_foto" value={formData.judul_foto} onChange={handleChange} placeholder="Foto Makrab 2025" />
+          <InputForm label="URL Gambar" name="url_foto" value={formData.url_foto} onChange={handleChange} placeholder="https://... (link ke gambar)" />
+          
+          {/* --- FIX DROPDOWN PUTIH --- */}
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-1">Kategori</label>
+            <select
+              name="kategori"
+              value={formData.kategori}
+              onChange={handleChange}
+              // Tambahin bg-nya di <select>
+              className="w-full p-3 bg-[#0d0a1f] rounded-lg border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-red-500/50"
+            >
+              {/* Tambahin className di tiap <option> */}
+              <option className="bg-[#0d0a1f] text-white" value="Makrab">Makrab</option>
+              <option className="bg-[#0d0a1f] text-white" value="Studi Banding">Studi Banding</option>
+              <option className="bg-[#0d0a1f] text-white" value="Workshop">Workshop</option>
+              <option className="bg-[#0d0a1f] text-white" value="Lomba">Lomba</option>
+              <option className="bg-[#0d0a1f] text-white" value="Lainnya">Lainnya</option>
+            </select>
+          </div>
+          {/* --- AKHIR FIX DROPDOWN --- */}
+
+          {/* --- FIX TOMBOL KAKU --- */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full mt-4 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-red-600 to-red-800 text-white font-semibold rounded-lg shadow-lg hover:scale-105 active:scale-[0.98] transition-all duration-300 disabled:opacity-50"
+          >
+            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Simpan Foto'}
+          </button>
+        </form>
+      </Modal>
+    </div>
+  );
+};
+
+// --- (6) MANAGE KOMENTAR COMPONENT (Aman) ---
 const ManageKomentar = () => {
-  // ... (Kode full ManageKomentar ada di sini, aman, ga diubah)
   const [komentarList, setKomentarList] = useState([]);
   const [loading, setLoading] = useState(true);
   const fetchKomentar = useCallback(async () => {
