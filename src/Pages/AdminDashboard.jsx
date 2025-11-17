@@ -250,7 +250,7 @@ const ManageProker = () => {
       }
     });
   };
-
+  
   return (
     <div data-aos="fade-up" data-aos-delay="200">
       <button
@@ -260,7 +260,6 @@ const ManageProker = () => {
         <Plus className="w-5 h-5" />
         Tambah Program Kerja
       </button>
-
       <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
         {loading && prokerList.length === 0 && <Loader2 className="w-6 h-6 animate-spin mx-auto" />}
         {prokerList.map(item => (
@@ -305,7 +304,6 @@ const ManageProker = () => {
             placeholder="Contoh: Login Admin,CRUD Proker,Realtime Comment"
             isTextarea={true} 
           />
-          {/* --- FIX TOMBOL KAKU --- */}
           <button
             type="submit"
             disabled={loading}
@@ -319,13 +317,15 @@ const ManageProker = () => {
   );
 };
 
-// --- (4) MANAGE WORKSHOP COMPONENT (Fix Tombol) ---
+// --- (5) MANAGE WORKSHOP COMPONENT (Fix Upload + Tombol) ---
 const ManageWorkshop = () => {
   const [workshopList, setWorkshopList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
   const [formData, setFormData] = useState({ Title: '', Img: '' });
+  const [uploadFile, setUploadFile] = useState(null);
+
   const fetchWorkshop = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase.from('workshop').select('*').order('id', { ascending: false });
@@ -436,13 +436,15 @@ const ManageWorkshop = () => {
   );
 };
 
-// --- (5) MANAGE GALERI COMPONENT (Fix Dropdown + Tombol) ---
+// --- (6) MANAGE GALERI COMPONENT (Fix Dropdown + Tombol) ---
 const ManageGaleri = () => {
   const [galeriList, setGaleriList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
   const [formData, setFormData] = useState({ judul_foto: '', url_foto: '', kategori: 'Makrab' });
+  const [uploadFile, setUploadFile] = useState(null);
+  
   const fetchGaleri = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase.from('galeri').select('*').order('created_at', { ascending: false });
@@ -570,10 +572,8 @@ const ManageGaleri = () => {
               name="kategori"
               value={formData.kategori}
               onChange={handleChange}
-              // Tambahin bg-nya di <select>
               className="w-full p-3 bg-[#0d0a1f] rounded-lg border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-red-500/50"
             >
-              {/* Tambahin className di tiap <option> */}
               <option className="bg-[#0d0a1f] text-white" value="Makrab">Makrab</option>
               <option className="bg-[#0d0a1f] text-white" value="Studi Banding">Studi Banding</option>
               <option className="bg-[#0d0a1f] text-white" value="Workshop">Workshop</option>
@@ -597,7 +597,7 @@ const ManageGaleri = () => {
   );
 };
 
-// --- (6) MANAGE KOMENTAR COMPONENT (Aman) ---
+// --- (7) MANAGE KOMENTAR COMPONENT (Aman) ---
 const ManageKomentar = () => {
   const [komentarList, setKomentarList] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -668,13 +668,15 @@ const ManageKomentar = () => {
 };
 
 
-// --- (7) MANAGE ANGGOTA COMPONENT (Fix Tombol) ---
+// --- (8) MANAGE ANGGOTA COMPONENT (Fix Upload + Tombol) ---
 const ManageAnggota = () => {
   const [anggotaList, setAnggotaList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
   const [formData, setFormData] = useState({ nama: '', jabatan: 'Anggota', foto_url: '' });
+  const [uploadFile, setUploadFile] = useState(null);
+  
   const fetchAnggota = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase.from('anggota').select('*').order('id', { ascending: false });
@@ -812,7 +814,7 @@ const ManageAnggota = () => {
 };
 
 
-// --- (8) MANAGE IDE COMPONENT (Aman) ---
+// --- (9) MANAGE IDE COMPONENT (Aman) ---
 const ManageIde = () => {
   const [ideList, setIdeList] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -1057,6 +1059,7 @@ const ManageAdmin = () => {
             required
           />
           
+          {/* --- FIX TOMBOL KAKU --- */}
           <button
             type="submit"
             disabled={isSubmitting}
@@ -1070,7 +1073,7 @@ const ManageAdmin = () => {
   );
 };
 
-// Helper buat Form Input (Versi Upgrade + required)
+// --- (10) Helper buat Form Input (Aman) ---
 const InputForm = ({ label, name, value, onChange, placeholder, isTextarea = false, type = 'text', required = false }) => (
   <div>
     <label className="block text-sm font-medium text-gray-300 mb-1">{label}</label>
@@ -1082,7 +1085,7 @@ const InputForm = ({ label, name, value, onChange, placeholder, isTextarea = fal
         placeholder={placeholder}
         className="w-full p-3 bg-white/10 rounded-lg border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-red-500/50"
         rows={4}
-        required={required} // <-- Tambah
+        required={required}
       />
     ) : (
       <input
@@ -1092,7 +1095,7 @@ const InputForm = ({ label, name, value, onChange, placeholder, isTextarea = fal
         onChange={onChange}
         placeholder={placeholder}
         className="w-full p-3 bg-white/10 rounded-lg border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-red-500/50"
-        required={required} // <-- Tambah
+        required={required}
       />
     )}
   </div>
