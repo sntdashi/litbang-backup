@@ -1,12 +1,13 @@
 // File: src/pages/Galeri.jsx (File Baru)
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { supabase } from '../supabaseClient';
-import { Loader2, Image, X } from 'lucide-react';
+import { supabase } from '../supabaseClient'; // Pastiin path ini bener
+import { Loader2, Image } from 'lucide-react';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 // Import Modal dari MUI (Material-UI)
 import { Modal, Box, IconButton, Backdrop } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close'; // Import ikon Close
 
 // Kategori buat filter (samain kayak di Admin Panel)
 const KATEGORI = ['Semua', 'Makrab', 'Studi Banding', 'Workshop', 'Lomba', 'Lainnya'];
@@ -176,7 +177,7 @@ const GaleriPage = () => {
 							"&:hover": { bgcolor: "rgba(0,0,0,0.8)" },
 						}}
 						size="large">
-						<X className="w-6 h-6" />
+						<CloseIcon className="w-6 h-6" />
 					</IconButton>
 
 					{/* Foto Gede */}
