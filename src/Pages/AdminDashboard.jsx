@@ -873,7 +873,7 @@ const ManageIde = () => {
   const getStatusColor = (status) => {
     if (status === 'Diterima') return 'bg-green-500/20 text-green-300';
     if (status === 'Di-review') return 'bg-yellow-500/20 text-yellow-300';
-    return 'bg-gray-500/20 text-gray-300'; // Default 'Pending'
+    return 'bg-gray-500/20 text-gray-300';
   };
   return (
     <div data-aos="fade-up" data-aos-delay="200">
@@ -928,20 +928,15 @@ const ManageIde = () => {
 };
 
 
-// --- (9) MANAGE ADMIN COMPONENT (Versi Upgrade + Nama) ---
+// --- (10) MANAGE ADMIN COMPONENT (Fix Tombol) ---
 const ManageAdmin = () => {
   const [adminList, setAdminList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  
-  // --- 1. TAMBAH STATE 'adminName' ---
   const [adminEmail, setAdminEmail] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
-  const [adminName, setAdminName] = useState(''); // <-- STATE BARU
-
+  const [adminName, setAdminName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // (fetchAdmins aman)
   const fetchAdmins = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase
@@ -949,43 +944,40 @@ const ManageAdmin = () => {
       .select('id, full_name, role') 
       .eq('role', 'admin');
     
-    if (!error) setAdminList(data);
-    else console.error("Error fetching admins:", error);
+    if (!error) {
+      setAdminList(data);
+    } else {
+      console.error("Error fetching admins:", error);
+      Swal.fire('Gagal!', 'Gagal ngambil list admin.', 'error');
+    }
     setLoading(false);
   }, []);
-
   useEffect(() => {
     fetchAdmins();
     AOS.refresh();
   }, [fetchAdmins]);
-
-  // --- 2. UPGRADE handleSubmitNewAdmin ---
   const handleSubmitNewAdmin = async (e) => {
     e.preventDefault();
-    // Cek nama juga
     if (!adminEmail || !adminPassword || !adminName) {
       Swal.fire('Error', 'Email, Password, & Nama Lengkap ga boleh kosong', 'error');
       return;
     }
     setIsSubmitting(true);
     try {
-      // Kirim 'adminName' di body
       const { data, error } = await supabase.functions.invoke('create-admin', {
         body: { 
           email: adminEmail, 
           password: adminPassword, 
-          adminName: adminName // <-- KIRIM NAMA
+          adminName: adminName
         },
       })
       if (error) throw error; 
-      
       Swal.fire('Slay!', `Admin baru ${adminName} berhasil dibuat!`, 'success');
       setIsModalOpen(false);
       setAdminEmail('');
       setAdminPassword('');
-      setAdminName(''); // <-- Kosongin form nama
+      setAdminName('');
       fetchAdmins();
-
     } catch (error) {
       console.error('Error invoke fungsi:', error);
       Swal.fire({
@@ -998,7 +990,6 @@ const ManageAdmin = () => {
       setIsSubmitting(false);
     }
   };
-  
   return (
     <div data-aos="fade-up" data-aos-delay="200">
       <button
@@ -1026,11 +1017,8 @@ const ManageAdmin = () => {
           </div>
         ))}
       </div>
-      
-      {/* --- 3. UPGRADE MODAL FORM --- */}
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Tambah Admin Baru">
         <form onSubmit={handleSubmitNewAdmin} className="space-y-4">
-          {/* --- TAMBAH INPUT NAMA --- */}
           <InputForm 
             label="Nama Lengkap Admin" 
             name="name" 
@@ -1038,7 +1026,7 @@ const ManageAdmin = () => {
             value={adminName} 
             onChange={(e) => setAdminName(e.target.value)} 
             placeholder="John Doe"
-            required // <-- Bikin wajib
+            required
           />
           <InputForm 
             label="Email Admin Baru" 
