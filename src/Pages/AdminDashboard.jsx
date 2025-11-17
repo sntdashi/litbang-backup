@@ -185,32 +185,43 @@ const ManageProker = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    const dataToSubmit = {
-      Title: formData.Title,
-      Description: formData.Description,
-      Img: formData.Img,
-      Link: formData.Link,
-      TechStack: formData.TechStack.split(',').map(s => s.trim()).filter(Boolean),
-      Features: formData.Features.split(',').map(s => s.trim()).filter(Boolean),
-    };
-
-    let error;
-    if (currentItem) { 
-      const { error: updateError } = await supabase.from('proker').update(dataToSubmit).eq('id', currentItem.id);
-      error = updateError;
-    } else { 
-      const { error: insertError } = await supabase.from('proker').insert([dataToSubmit]);
-      error = insertError;
-    }
-
-    if (error) {
-      Swal.fire('Gagal!', `Data gagal disimpan: ${error.message}`, 'error');
-    } else {
+    try {
+      let imageUrl = currentItem ? currentItem.Img : '';
+      if (uploadFile) {
+        const fileExt = uploadFile.name.split('.').pop();
+        const fileName = `${Date.now()}.${fileExt}`;
+        const filePath = `proker/${fileName}`; 
+        const { error: uploadError } = await supabase.storage.from('web-assets').upload(filePath, uploadFile);
+        if (uploadError) throw uploadError;
+        const { data: urlData } = supabase.storage.from('web-assets').getPublicUrl(filePath);
+        imageUrl = urlData.publicUrl;
+      }
+      const dataToSubmit = {
+        Title: formData.Title,
+        Description: formData.Description,
+        Img: imageUrl,
+        Link: formData.Link,
+        TechStack: formData.TechStack.split(',').map(s => s.trim()).filter(Boolean),
+        Features: formData.Features.split(',').map(s => s.trim()).filter(Boolean),
+      };
+      let error;
+      if (currentItem) { 
+        const { error: updateError } = await supabase.from('proker').update(dataToSubmit).eq('id', currentItem.id);
+        error = updateError;
+      } else { 
+        const { error: insertError } = await supabase.from('proker').insert([dataToSubmit]);
+        error = insertError;
+      }
+      if (error) throw error;
       Swal.fire('Slay!', 'Data berhasil disimpan!', 'success');
       handleCloseModal();
       fetchProker(); 
+    } catch (error) {
+      console.error("Error submit:", error);
+      Swal.fire('Gagal!', `Data gagal disimpan: ${error.message}`, 'error');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleDelete = (id, title) => {
@@ -326,17 +337,41 @@ const ManageWorkshop = () => {
   const handleOpenModal = (item) => {
     if (item) { setCurrentItem(item); setFormData({ Title: item.Title, Img: item.Img }); } 
     else { setCurrentItem(null); setFormData({ Title: '', Img: '' }); }
+    setUploadFile(null);
     setIsModalOpen(true);
   };
   const handleCloseModal = () => setIsModalOpen(false);
   const handleChange = (e) => { const { name, value } = e.target; setFormData(prev => ({ ...prev, [name]: value })); };
   const handleSubmit = async (e) => {
-    e.preventDefault(); setLoading(true); let error;
-    if (currentItem) { const { error: updateError } = await supabase.from('workshop').update(formData).eq('id', currentItem.id); error = updateError; } 
-    else { const { error: insertError } = await supabase.from('workshop').insert([formData]); error = insertError; }
-    if (error) Swal.fire('Gagal!', `Data gagal disimpan: ${error.message}`, 'error');
-    else { Swal.fire('Slay!', 'Data berhasil disimpan!', 'success'); handleCloseModal(); fetchWorkshop(); }
-    setLoading(false);
+    e.preventDefault(); setLoading(true); 
+    try {
+      let imageUrl = currentItem ? currentItem.Img : '';
+      if (uploadFile) {
+        const fileExt = uploadFile.name.split('.').pop();
+        const fileName = `${Date.now()}.${fileExt}`;
+        const filePath = `workshop/${fileName}`;
+        const { error: uploadError } = await supabase.storage.from('web-assets').upload(filePath, uploadFile);
+        if (uploadError) throw uploadError;
+        const { data: urlData } = supabase.storage.from('web-assets').getPublicUrl(filePath);
+        imageUrl = urlData.publicUrl;
+      }
+      const dataToSubmit = {
+        Title: formData.Title,
+        Img: imageUrl
+      };
+      let error;
+      if (currentItem) { const { error: updateError } = await supabase.from('workshop').update(dataToSubmit).eq('id', currentItem.id); error = updateError; } 
+      else { const { error: insertError } = await supabase.from('workshop').insert([dataToSubmit]); error = insertError; }
+      if (error) throw error;
+      Swal.fire('Slay!', 'Data berhasil disimpan!', 'success'); 
+      handleCloseModal(); 
+      fetchWorkshop();
+    } catch (error) {
+      console.error("Error submit:", error);
+      Swal.fire('Gagal!', `Data gagal disimpan: ${error.message}`, 'error');
+    } finally {
+      setLoading(false);
+    }
   };
   const handleDelete = (id, title) => {
     Swal.fire({
@@ -427,26 +462,45 @@ const ManageGaleri = () => {
       setCurrentItem(null);
       setFormData({ judul_foto: '', url_foto: '', kategori: 'Makrab' });
     }
+    setUploadFile(null);
     setIsModalOpen(true);
   };
   const handleCloseModal = () => setIsModalOpen(false);
   const handleChange = (e) => { const { name, value } = e.target; setFormData(prev => ({ ...prev, [name]: value })); };
   const handleSubmit = async (e) => {
-    e.preventDefault(); setLoading(true); let error;
-    if (currentItem) {
-      const { error: updateError } = await supabase.from('galeri').update(formData).eq('id', currentItem.id);
-      error = updateError;
-    } else {
-      const { error: insertError } = await supabase.from('galeri').insert([formData]);
-      error = insertError;
-    }
-    if (error) Swal.fire('Gagal!', `Data gagal disimpan: ${error.message}`, 'error');
-    else {
+    e.preventDefault(); setLoading(true); 
+    try {
+      let imageUrl = currentItem ? currentItem.url_foto : '';
+      if (uploadFile) {
+        const fileExt = uploadFile.name.split('.').pop();
+        const fileName = `${Date.now()}.${fileExt}`;
+        const filePath = `galeri/${fileName}`;
+        const { error: uploadError } = await supabase.storage.from('web-assets').upload(filePath, uploadFile);
+        if (uploadError) throw uploadError;
+        const { data: urlData } = supabase.storage.from('web-assets').getPublicUrl(filePath);
+        imageUrl = urlData.publicUrl;
+      }
+      if (!imageUrl && !currentItem) { // Cek kalo nambah baru tapi ga upload
+        throw new Error("Lu belom upload foto, ngab!");
+      }
+      const dataToSubmit = {
+        judul_foto: formData.judul_foto,
+        url_foto: imageUrl,
+        kategori: formData.kategori
+      };
+      let error;
+      if (currentItem) { const { error: updateError } = await supabase.from('galeri').update(dataToSubmit).eq('id', currentItem.id); error = updateError; } 
+      else { const { error: insertError } = await supabase.from('galeri').insert([dataToSubmit]); error = insertError; }
+      if (error) throw error;
       Swal.fire('Slay!', 'Foto berhasil disimpan ke galeri!', 'success');
       handleCloseModal();
       fetchGaleri();
+    } catch (error) {
+      console.error("Error submit:", error);
+      Swal.fire('Gagal!', `Data gagal disimpan: ${error.message}`, 'error');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
   const handleDelete = (id, title) => {
     Swal.fire({
@@ -640,26 +694,42 @@ const ManageAnggota = () => {
       setCurrentItem(null);
       setFormData({ nama: '', jabatan: 'Anggota', foto_url: '' }); 
     }
+    setUploadFile(null);
     setIsModalOpen(true);
   };
   const handleCloseModal = () => setIsModalOpen(false);
   const handleChange = (e) => { const { name, value } = e.target; setFormData(prev => ({ ...prev, [name]: value })); };
   const handleSubmit = async (e) => {
-    e.preventDefault(); setLoading(true); let error;
-    if (currentItem) {
-      const { error: updateError } = await supabase.from('anggota').update(formData).eq('id', currentItem.id);
-      error = updateError;
-    } else {
-      const { error: insertError } = await supabase.from('anggota').insert([formData]);
-      error = insertError;
-    }
-    if (error) Swal.fire('Gagal!', `Data gagal disimpan: ${error.message}`, 'error');
-    else {
+    e.preventDefault(); setLoading(true); 
+    try {
+      let imageUrl = currentItem ? currentItem.foto_url : '';
+      if (uploadFile) {
+        const fileExt = uploadFile.name.split('.').pop();
+        const fileName = `${Date.now()}.${fileExt}`;
+        const filePath = `anggota/${fileName}`;
+        const { error: uploadError } = await supabase.storage.from('web-assets').upload(filePath, uploadFile);
+        if (uploadError) throw uploadError;
+        const { data: urlData } = supabase.storage.from('web-assets').getPublicUrl(filePath);
+        imageUrl = urlData.publicUrl;
+      }
+      const dataToSubmit = {
+        nama: formData.nama,
+        jabatan: formData.jabatan,
+        foto_url: imageUrl
+      };
+      let error;
+      if (currentItem) { const { error: updateError } = await supabase.from('anggota').update(dataToSubmit).eq('id', currentItem.id); error = updateError; } 
+      else { const { error: insertError } = await supabase.from('anggota').insert([dataToSubmit]); error = insertError; }
+      if (error) throw error;
       Swal.fire('Slay!', 'Anggota berhasil disimpan!', 'success');
       handleCloseModal();
       fetchAnggota();
+    } catch (error) {
+      console.error("Error submit:", error);
+      Swal.fire('Gagal!', `Data gagal disimpan: ${error.message}`, 'error');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
   const handleDelete = (id, nama) => {
     Swal.fire({
