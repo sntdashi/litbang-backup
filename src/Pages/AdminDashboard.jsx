@@ -11,7 +11,8 @@ import {
   Users,
   UserPlus,
   Lightbulb,
-  Image
+  Image,
+  UploadCloud // <-- 1. IMPORT IKON BARU
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import AOS from 'aos';
@@ -56,13 +57,88 @@ const Modal = ({ isOpen, onClose, title, children }) => {
 };
 // --- AKHIR MODAL ---
 
-// --- (3) MANAGE PROKER COMPONENT (Fix Tombol) ---
+// --- 3. HELPER BARU: InputFileForm ---
+const InputFileForm = ({ label, currentImage, onFileChange }) => {
+  const [preview, setPreview] = useState(null);
+
+  useEffect(() => {
+    if (!preview && currentImage) {
+      setPreview(currentImage);
+    }
+  }, [currentImage, preview]);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+      onFileChange(file);
+    } else {
+      setPreview(currentImage || null);
+      onFileChange(null);
+    }
+  };
+
+  return (
+    <div>
+      <label className="block text-sm font-medium text-gray-300 mb-1">{label}</label>
+      <div className="flex items-center gap-4">
+        <div className="w-24 h-24 bg-white/5 rounded-lg border border-white/20 flex-shrink-0">
+          {preview ? (
+            <img src={preview} alt="Preview" className="w-full h-full object-cover rounded-lg" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-gray-500">
+              <Image className="w-8 h-8" />
+            </div>
+          )}
+        </div>
+        <div className="w-full">
+          <input
+            type="file"
+            id={`file-upload-${label}`}
+            className="hidden"
+            accept="image/png, image/jpeg, image/gif, image/webp"
+            onChange={handleFileChange}
+          />
+          <label
+            htmlFor={`file-upload-${label}`}
+            className="w-full cursor-pointer flex items-center justify-center gap-2 px-4 py-3 bg-white/10 rounded-xl border border-white/20 placeholder-gray-500 text-white focus:outline-none focus:ring-2 focus:ring-red-500/30 transition-all duration-300 hover:border-red-500/30"
+          >
+            <UploadCloud className="w-5 h-5" />
+            <span>{preview ? 'Ganti Foto...' : 'Upload Foto...'}</span>
+          </label>
+          {preview && (
+            <button
+              type="button"
+              onClick={() => {
+                setPreview(null);
+                onFileChange(null);
+                document.getElementById(`file-upload-${label}`).value = null;
+              }}
+              className="text-xs text-red-400 hover:text-red-300 mt-2"
+            >
+              Hapus Foto
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+// --- AKHIR HELPER BARU ---
+
+
+// --- (4) MANAGE PROKER COMPONENT (Fix Upload + Tombol) ---
 const ManageProker = () => {
   const [prokerList, setProkerList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentItem, setCurrentItem] = useState(null); 
   const [formData, setFormData] = useState({ Title: '', Description: '', Img: '', Link: '', TechStack: '', Features: '' });
+  const [uploadFile, setUploadFile] = useState(null);
 
   const fetchProker = useCallback(async () => {
     setLoading(true);
@@ -83,7 +159,7 @@ const ManageProker = () => {
       setFormData({ 
         Title: item.Title, 
         Description: item.Description, 
-        Img: item.Img, 
+        Img: item.Img,
         Link: item.Link,
         TechStack: (item.TechStack || []).join(','), 
         Features: (item.Features || []).join(',') 
@@ -92,6 +168,7 @@ const ManageProker = () => {
       setCurrentItem(null);
       setFormData({ Title: '', Description: '', Img: '', Link: '', TechStack: '', Features: '' });
     }
+    setUploadFile(null);
     setIsModalOpen(true);
   };
 
@@ -192,12 +269,15 @@ const ManageProker = () => {
           </div>
         ))}
       </div>
-
       <Modal isOpen={isModalOpen} onClose={handleCloseModal} title={currentItem ? 'Edit Proker' : 'Tambah Proker Baru'}>
         <form onSubmit={handleSubmit} className="space-y-4">
           <InputForm label="Judul Proker" name="Title" value={formData.Title} onChange={handleChange} />
           <InputForm label="Deskripsi" name="Description" value={formData.Description} onChange={handleChange} isTextarea={true} />
-          <InputForm label="Image URL" name="Img" value={formData.Img} onChange={handleChange} placeholder="https://... (link ke gambar)" />
+          <InputFileForm 
+            label="Gambar Proker"
+            currentImage={formData.Img}
+            onFileChange={setUploadFile}
+          />
           <InputForm label="Link Proyek (Instagram/Demo)" name="Link" value={formData.Link} onChange={handleChange} placeholder="https://instagram.com/..." />
           <InputForm 
             label="Tech Stack (Pisahkan dengan koma)" 
@@ -303,9 +383,11 @@ const ManageWorkshop = () => {
       <Modal isOpen={isModalOpen} onClose={handleCloseModal} title={currentItem ? 'Edit Workshop' : 'Tambah Workshop Baru'}>
         <form onSubmit={handleSubmit} className="space-y-4">
           <InputForm label="Judul Workshop/Riset" name="Title" value={formData.Title} onChange={handleChange} />
-          <InputForm label="Image URL (Poster/Foto)" name="Img" value={formData.Img} onChange={handleChange} placeholder="https://... (link ke gambar)" />
-          
-          {/* --- FIX TOMBOL KAKU --- */}
+          <InputFileForm 
+            label="Gambar Workshop (Poster/Foto)"
+            currentImage={formData.Img}
+            onFileChange={setUploadFile}
+          />
           <button
             type="submit"
             disabled={loading}
@@ -418,8 +500,15 @@ const ManageGaleri = () => {
       <Modal isOpen={isModalOpen} onClose={handleCloseModal} title={currentItem ? 'Edit Foto' : 'Tambah Foto Baru'}>
         <form onSubmit={handleSubmit} className="space-y-4">
           <InputForm label="Judul Foto" name="judul_foto" value={formData.judul_foto} onChange={handleChange} placeholder="Foto Makrab 2025" />
-          <InputForm label="URL Gambar" name="url_foto" value={formData.url_foto} onChange={handleChange} placeholder="https://... (link ke gambar)" />
           
+          {/* --- FIX UPLOAD --- */}
+          <InputFileForm 
+            label="Upload Foto"
+            currentImage={formData.url_foto}
+            onFileChange={setUploadFile}
+          />
+          {/* --- AKHIR FIX --- */}
+
           {/* --- FIX DROPDOWN PUTIH --- */}
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-1">Kategori</label>
@@ -634,9 +723,11 @@ const ManageAnggota = () => {
         <form onSubmit={handleSubmit} className="space-y-4">
           <InputForm label="Nama Anggota" name="nama" value={formData.nama} onChange={handleChange} placeholder="John Doe" />
           <InputForm label="Jabatan" name="jabatan" value={formData.jabatan} onChange={handleChange} placeholder="Anggota" />
-          <InputForm label="URL Foto Profil (Opsional)" name="foto_url" value={formData.foto_url} onChange={handleChange} placeholder="https://... (link ke gambar)" />
-          
-          {/* --- FIX TOMBOL KAKU --- */}
+          <InputFileForm 
+            label="Foto Profil Anggota"
+            currentImage={formData.foto_url}
+            onFileChange={setUploadFile}
+          />
           <button
             type="submit"
             disabled={loading}
