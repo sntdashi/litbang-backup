@@ -765,14 +765,20 @@ const ManageIde = () => {
 };
 
 
-// --- (9) MANAGE ADMIN COMPONENT (Fix Tombol) ---
+// --- (9) MANAGE ADMIN COMPONENT (Versi Upgrade + Nama) ---
 const ManageAdmin = () => {
   const [adminList, setAdminList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  // --- 1. TAMBAH STATE 'adminName' ---
   const [adminEmail, setAdminEmail] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
+  const [adminName, setAdminName] = useState(''); // <-- STATE BARU
+
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // (fetchAdmins aman)
   const fetchAdmins = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase
@@ -780,35 +786,43 @@ const ManageAdmin = () => {
       .select('id, full_name, role') 
       .eq('role', 'admin');
     
-    if (!error) {
-      setAdminList(data);
-    } else {
-      console.error("Error fetching admins:", error);
-      Swal.fire('Gagal!', 'Gagal ngambil list admin.', 'error');
-    }
+    if (!error) setAdminList(data);
+    else console.error("Error fetching admins:", error);
     setLoading(false);
   }, []);
+
   useEffect(() => {
     fetchAdmins();
     AOS.refresh();
   }, [fetchAdmins]);
+
+  // --- 2. UPGRADE handleSubmitNewAdmin ---
   const handleSubmitNewAdmin = async (e) => {
     e.preventDefault();
-    if (!adminEmail || !adminPassword) {
-      Swal.fire('Error', 'Email & Password ga boleh kosong', 'error');
+    // Cek nama juga
+    if (!adminEmail || !adminPassword || !adminName) {
+      Swal.fire('Error', 'Email, Password, & Nama Lengkap ga boleh kosong', 'error');
       return;
     }
     setIsSubmitting(true);
     try {
+      // Kirim 'adminName' di body
       const { data, error } = await supabase.functions.invoke('create-admin', {
-        body: { email: adminEmail, password: adminPassword },
+        body: { 
+          email: adminEmail, 
+          password: adminPassword, 
+          adminName: adminName // <-- KIRIM NAMA
+        },
       })
       if (error) throw error; 
-      Swal.fire('Slay!', `Admin baru ${adminEmail} berhasil dibuat!`, 'success');
+      
+      Swal.fire('Slay!', `Admin baru ${adminName} berhasil dibuat!`, 'success');
       setIsModalOpen(false);
       setAdminEmail('');
       setAdminPassword('');
+      setAdminName(''); // <-- Kosongin form nama
       fetchAdmins();
+
     } catch (error) {
       console.error('Error invoke fungsi:', error);
       Swal.fire({
@@ -821,6 +835,7 @@ const ManageAdmin = () => {
       setIsSubmitting(false);
     }
   };
+  
   return (
     <div data-aos="fade-up" data-aos-delay="200">
       <button
@@ -848,8 +863,20 @@ const ManageAdmin = () => {
           </div>
         ))}
       </div>
+      
+      {/* --- 3. UPGRADE MODAL FORM --- */}
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Tambah Admin Baru">
         <form onSubmit={handleSubmitNewAdmin} className="space-y-4">
+          {/* --- TAMBAH INPUT NAMA --- */}
+          <InputForm 
+            label="Nama Lengkap Admin" 
+            name="name" 
+            type="text"
+            value={adminName} 
+            onChange={(e) => setAdminName(e.target.value)} 
+            placeholder="John Doe"
+            required // <-- Bikin wajib
+          />
           <InputForm 
             label="Email Admin Baru" 
             name="email" 
@@ -857,6 +884,7 @@ const ManageAdmin = () => {
             value={adminEmail} 
             onChange={(e) => setAdminEmail(e.target.value)} 
             placeholder="adminbaru@email.com"
+            required
           />
           <InputForm 
             label="Password Admin Baru" 
@@ -865,9 +893,9 @@ const ManageAdmin = () => {
             value={adminPassword} 
             onChange={(e) => setAdminPassword(e.target.value)} 
             placeholder="Minimal 6 karakter"
+            required
           />
           
-          {/* --- FIX TOMBOL KAKU --- */}
           <button
             type="submit"
             disabled={isSubmitting}
@@ -881,8 +909,8 @@ const ManageAdmin = () => {
   );
 };
 
-// --- (10) Helper buat Form Input (Aman) ---
-const InputForm = ({ label, name, value, onChange, placeholder, isTextarea = false, type = 'text' }) => (
+// Helper buat Form Input (Versi Upgrade + required)
+const InputForm = ({ label, name, value, onChange, placeholder, isTextarea = false, type = 'text', required = false }) => (
   <div>
     <label className="block text-sm font-medium text-gray-300 mb-1">{label}</label>
     {isTextarea ? (
@@ -893,6 +921,7 @@ const InputForm = ({ label, name, value, onChange, placeholder, isTextarea = fal
         placeholder={placeholder}
         className="w-full p-3 bg-white/10 rounded-lg border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-red-500/50"
         rows={4}
+        required={required} // <-- Tambah
       />
     ) : (
       <input
@@ -902,6 +931,7 @@ const InputForm = ({ label, name, value, onChange, placeholder, isTextarea = fal
         onChange={onChange}
         placeholder={placeholder}
         className="w-full p-3 bg-white/10 rounded-lg border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-red-500/50"
+        required={required} // <-- Tambah
       />
     )}
   </div>
