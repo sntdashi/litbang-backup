@@ -12,7 +12,8 @@ import {
   UserPlus,
   Lightbulb,
   Image,
-  UploadCloud // <-- 1. IMPORT IKON BARU
+  UploadCloud,
+  ArrowUpCircle // <-- 1. INI DIA FIX-NYA
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import AOS from 'aos';
@@ -572,8 +573,10 @@ const ManageGaleri = () => {
               name="kategori"
               value={formData.kategori}
               onChange={handleChange}
+              // Tambahin bg-nya di <select>
               className="w-full p-3 bg-[#0d0a1f] rounded-lg border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-red-500/50"
             >
+              {/* Tambahin className di tiap <option> */}
               <option className="bg-[#0d0a1f] text-white" value="Makrab">Makrab</option>
               <option className="bg-[#0d0a1f] text-white" value="Studi Banding">Studi Banding</option>
               <option className="bg-[#0d0a1f] text-white" value="Workshop">Workshop</option>
